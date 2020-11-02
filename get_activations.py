@@ -19,7 +19,7 @@ import json
 import os.path as osp
 from PIL import Image  
 import pickle
-
+import functools
 
 def get_args():
     parser = argparse.ArgumentParser(description="Script to launch jigsaw training", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -112,8 +112,11 @@ class Trainer:
             data, jig_l, class_l = data.to(self.device), jig_l.to(self.device), class_l.to(self.device)
             jigsaw_logit, class_logit = self.model(data)
             labels.append(class_l.detach().cpu().numpy())
+        self.activations = functools.reduce((lambda x,y: np.append(x,y,axis=0)),self.activations)
+        labels = functools.reduce((lambda x,y: np.append(x,y,axis=0)),labels)
+        
         target_data = {}
-        target_data['activations'] = self.activations
+        target_data['features'] = self.activations
         target_data['labels'] = labels
         with open(osp.join('logs',self.folder_name, 'act_labels.pkl'), 'wb') as handle:
           pickle.dump(target_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
