@@ -1,5 +1,3 @@
-Rename art_painting to art in:
-	Original PACS folder
 	Code: data/data_helper.py
 
 	for i in *.txt; do sed -i "s@/home/fmc/data/PACS/kfold/@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/sketch_target/@g" $i; done
@@ -18,13 +16,14 @@ vaasudev/PACS -> vaasudev/StylizedPACS
 ---
 Sketch as target: DG
 
-for i in *.txt; do sed -i "s@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/sketch_target/@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/sketch_target/sketch_target/@g" $i; done
+for i in *.txt; do sed -i "s@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/photo_target/@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/sketch_target/@g" $i; done
 
 for i in *.txt; do sed -i "s@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/sketch_target/@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/cartoon_target/@g" $i; done
 
 for i in *.txt; do sed -i "s@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/cartoon_target/@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/art_target/@g" $i; done
 
 for i in *.txt; do sed -i "s@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/art_target/@/DATA1/vaasudev_narayanan/datasets/StylizedPACS/photo_target/@g" $i; done
+
 
 ----
 
