@@ -72,7 +72,7 @@ class Trainer:
         self.target_loader = data_helper.get_val_dataloader(args, patches=model.is_patch_based())
         #self.test_loaders = {"val": self.val_loader, "test": self.target_loader}
         #self.len_dataloader = len(self.source_loader)
-        print("Dataset size: test %d" % , (len(self.target_loader.dataset)))
+        print("Dataset size: test %d" % (len(self.target_loader.dataset)))
         self.optimizer, self.scheduler = get_optim_and_scheduler(model, args.epochs, args.learning_rate, args.train_all, nesterov=args.nesterov)
         self.jig_weight = args.jig_weight
         self.only_non_scrambled = args.classify_only_sane
