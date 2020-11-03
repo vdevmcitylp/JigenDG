@@ -1,5 +1,7 @@
-import argparse
+import warnings
+warnings.simplefilter(action = "ignore")
 
+import argparse
 import os
 
 import torch
@@ -50,6 +52,7 @@ def get_args():
     parser.add_argument("--nesterov", action='store_true', help="Use nesterov")
     
     parser.add_argument("--jig_only", action = "store_true", help = "Disable classification loss")
+    parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
 
     return parser.parse_args()
 
@@ -219,6 +222,9 @@ def main():
 
     if args.jig_only:
         print("Training only Jigsaw head, classification head disabled.")
+
+    if args.stylized:
+        print("Using txt_files/StylizedPACS/...")
 
     trainer = Trainer(args, device)
     trainer.do_training()

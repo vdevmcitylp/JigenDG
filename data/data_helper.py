@@ -60,7 +60,11 @@ def get_train_dataloader(args, patches):
     img_transformer, tile_transformer = get_train_transformers(args)
     limit = args.limit_source
     for dname in dataset_list:
-        name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % dname), args.val_size)
+        if args.stylized:
+            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
+                "{}_target".format(args.target), '%s_train.txt' % dname), args.val_size)
+        else:
+            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % dname), args.val_size)
         train_dataset = JigsawDataset(name_train, labels_train, patches=patches, img_transformer=img_transformer,
                                       tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
         if limit:
@@ -77,7 +81,12 @@ def get_train_dataloader(args, patches):
 
 
 def get_val_dataloader(args, patches=False):
-    names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', '%s_test.txt' % args.target))
+    if args.stylized:
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
+                "{}_target".format(args.target), '%s_test.txt' % args.target))
+    else:
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', '%s_test.txt' % args.target))
+    
     img_tr = get_val_transformer(args)
     val_dataset = JigsawTestDataset(names, labels, patches=patches, img_transformer=img_tr, jig_classes=args.jigsaw_n_classes)
     if args.limit_target and len(val_dataset) > args.limit_target:
@@ -89,7 +98,12 @@ def get_val_dataloader(args, patches=False):
 
 
 def get_jigsaw_val_dataloader(args, patches=False):
-    names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', '%s_test.txt' % args.target))
+    if args.stylized:
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
+                "{}_target".format(args.target), '%s_test.txt' % args.target))
+    else:
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', '%s_test.txt' % args.target))
+
     img_tr = [transforms.Resize((args.image_size, args.image_size))]
     tile_tr = [transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
     img_transformer = transforms.Compose(img_tr)
@@ -127,7 +141,11 @@ def get_val_transformer(args):
 
 def get_target_jigsaw_loader(args):
     img_transformer, tile_transformer = get_train_transformers(args)
-    name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % args.target), 0)
+    if args.stylized:
+        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', "{}_target".format(args.target), 
+            '%s_train.txt' % args.target), 0)
+    else:
+        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % args.target), 0)
     dataset = JigsawDataset(name_train, labels_train, patches=False, img_transformer=img_transformer,
                             tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
     loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)

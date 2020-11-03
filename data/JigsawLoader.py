@@ -74,7 +74,8 @@ class JigsawDataset(data.Dataset):
         return tile
     
     def get_image(self, index):
-        framename = self.data_path + '/' + self.names[index]
+        # framename = self.data_path + '/' + self.names[index]
+        framename = self.data_path + self.names[index]
         img = Image.open(framename).convert('RGB')
         return self._image_transformer(img)
         
