@@ -90,7 +90,7 @@ class Trainer:
         
 
         self.folder_name = folder_name
-        #self.save_folder = os.path.join("logs", folder_name, logname)
+        self.save_folder = os.path.join("logs", folder_name, logname)
 
     def hook(self, model, input, output):
         output = output.view(output.size(0), -1)
@@ -118,7 +118,7 @@ class Trainer:
         target_data = {}
         target_data['features'] = self.activations
         target_data['labels'] = labels
-        with open(osp.join('logs',self.folder_name, 'act_labels.pkl'), 'wb') as handle:
+        with open(osp.join('logs', self.save_folder, 'act_labels.pkl'), 'wb') as handle:
           pickle.dump(target_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         return self.activations 
