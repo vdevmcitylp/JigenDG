@@ -98,28 +98,95 @@ def shuffle(x, y):
     y = y[perm]
     return x,y
 
+
+def get_data(source, paths):
+    features = np.array([])
+    labels = np.array([])
+    for sp in source:
+      data = load_data(osp.join(paths[sp],'act_labels.pkl'))
+      if features.any():
+        features = np.append(features,data['features'], axis=0)
+        labels = np.append(labels,data['labels'],axis=0)
+      else:
+        features = data['features']
+        labels = data['labels']
+    return features, labels
+
+class ClusteringData():
+
+    def __init__(self, source, target, paths, split=0, dg_setting=False):
+      self.target = target
+      self.source = source
+      self.paths = paths
+      self.dg_setting = dg_setting
+
+      if dg_setting:
+        self.get_dg_data()
+      
+      else:
+        features, labels = self.get_data(source=False)
+        if split:
+          self.split_data(features, labels, split)
+        else:
+          self.source_features = features
+          self.source_labels = labels
+          self.target_features = features
+          self.target_labels = labels
+
+      
+    def split_data(self, features, labels, split):
+
+        count = int(len(labels)*split)
+        self.source_features = features[:count]
+        self.source_labels = labels[:count]
+        self.target_features = features[count:]
+        self.target_labels = labels[count:]
+
+
+    def get_dg_data(self):
+
+      self.source_features, self.source_labels = self.get_data(source=True)
+      self.target_features, self.target_labels = self.get_data(source=False)
+
+    def get_data(self, source=True):
+      features = np.array([])
+      labels = np.array([])
+      if source:
+        domains = self.source
+      else:
+        domains = self.target
+      for sp in domains:
+          data = load_data(osp.join(paths[sp],'act_labels.pkl'))
+          if features.any():
+            features = np.append(features,data['features'], axis=0)
+            labels = np.append(labels,data['labels'],axis=0)
+          else:
+            features = data['features']
+            labels = data['labels']
+      return features, labels
+
+
 if __name__ == "__main__":
+  
+    source = ['art', 'photo','sketch']
+    target = [ 'cartoon']
+    paths = {}
+    paths['photo'] = '/content/drive/My Drive/Codes/JigenDG/logs/photo_target_stylizedjigsaw/art-cartoon-sketch_to_photo'
+    paths['art'] = '/content/drive/My Drive/Codes/JigenDG/logs/art_target_stylizedjigsaw/cartoon-photo-sketch_to_art'
+    paths['cartoon'] = '/content/drive/My Drive/Codes/JigenDG/logs/cartoon_target_stylizedjigsaw/art-photo-sketch_to_cartoon'
+    paths['sketch'] = '/content/drive/My Drive/Codes/JigenDG/logs/sketch_target_stylizedjigsaw/art-cartoon-photo_to_sketch'
+    dg_setting = True
+    #Use dg_setting=True to cluster on source domains and evaluate on target domain
+    #Use dg_setting=False, split = 0 to cluster and evaluate on target 
+    #Use dg_setting=False, split = 0.6 to cluster on 50% target data and evaluate on 40% target data
+    dataset = ClusteringData(source, target, paths, split=0.6, dg_setting=True)
+  
 
-    root = '/content/drive/My Drive/Codes/JigenDG/logs/cartoon_target_stylizedjigsaw/art-photo-sketch_to_cartoon'
-    pkl_file = 'act_labels.pkl'
-    data = load_data(osp.join(root, pkl_file))
-    features = data['features']
-    labels = data['labels']
-    features, labels = shuffle(features, labels)
-    split = 0 #Use 0 to use all the data
-    if split:
-      count = int(len(labels)*split)
-      tr_features = features[:count]
-      tr_labels = labels[:count]
-      te_features = features[count:]
-      te_labels = labels[count:]
-    else:
-      tr_features = features
-      te_features = features
-      te_labels = labels
-
-    model = cluster(tr_features)
-    evaluate_clustering(model, te_features, te_labels)
+   
+    print('Source features: {}'.format(dataset.source_features.shape))
+    model = cluster(dataset.source_features)
+    print('Target features: {}'.format(dataset.target_features.shape))
+    evaluate_clustering(model, dataset.target_features, dataset.target_labels)
 
 
     
