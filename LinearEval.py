@@ -11,12 +11,12 @@ from torch.utils.data import Dataset
 import torch.optim as optim
 import timeit
 import pickle
-
+import os.path as osp
 
 
 class LinearEvalDataset(Dataset):
     
-    def __init__(self, pkl_file, root_dir, transform=None):
+    def __init__(self, pkl_file, root_dir, train_split=None, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -25,8 +25,12 @@ class LinearEvalDataset(Dataset):
                 on a sample.
         """
         data = self.load_file(root_dir+pkl_file)
-        self.features = data['features']
-        self.labels = data['labels']
+        if train_split:
+          count = int(len(data['labels'])*train_split)
+        else:
+          count = len(data['labels'])
+        self.features = data['features'][:count]
+        self.labels = data['labels'][:count]
         self.root_dir = root_dir
         self.transform = transform
 
@@ -78,12 +82,40 @@ def test(model, device, test_loader, criterion):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-
+    test_acc = correct / len(test_loader.dataset)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+    return test_loss, test_acc
 
-def LinearEval(root):
+def shuffle(x, y):
+    perm = np.random.permutation(len(y))
+    x = x[perm]
+    y = y[perm]
+    return x,y
+
+def split_data(root, split):
+    pkl_file = osp.join(root, 'act_labels.pkl')
+    with open(pkl_file, 'rb') as handle:
+          data = pickle.load(handle)
+    n = int(split*len(data['labels']))
+    features = data['features']
+    labels = data['labels']
+    features, labels = shuffle(features, labels)
+    tr_data = {}
+    te_data = {}
+    tr_data['features'] = features[:n]
+    tr_data['labels'] = labels[:n]
+    te_data['features'] = features[n:]
+    te_data['labels'] = labels[n:]
+
+    with open(osp.join(root, 'train_data.pkl'), 'wb') as handle:
+          pickle.dump(tr_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(osp.join(root, 'test_data.pkl'), 'wb') as handle:
+          pickle.dump(te_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def LinearEval(root, split=None):
+    
     train_dataset = LinearEvalDataset('train_data.pkl', root, train_split=split)
     test_dataset = LinearEvalDataset('test_data.pkl', root)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
@@ -103,9 +135,13 @@ def LinearEval(root):
         stop = timeit.default_timer()
     print('Total time taken: {} seconds'.format(int(stop - start)) )
     print('Best Acc: {}'.format(best_acc))
-
+    
+    
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
-    #Location of the train and test pkl files
-    data_root = '/content/drive/My Drive/Codes/JigenDG/logs/photo_target_jigsaweval/art-cartoon-sketch_to_photo/'
-    LinearEval(data_root)
+
+    #Location of the train and test pkl files - with 50-50 split
+    #Use split data function to create the splits
+    data_root = '/content/drive/My Drive/Codes/JigenDG/logs/cartoon_target_stylizedjigsaw/art-photo-sketch_to_cartoon/'
+    split = 0.1
+    LinearEval(data_root, split=split)
