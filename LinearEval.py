@@ -84,7 +84,7 @@ def test(model, device, test_loader, criterion):
         100. * correct / len(test_loader.dataset)))
 
 def LinearEval(root):
-    train_dataset = LinearEvalDataset('train_data.pkl', root)
+    train_dataset = LinearEvalDataset('train_data.pkl', root, train_split=split)
     test_dataset = LinearEvalDataset('test_data.pkl', root)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
@@ -93,13 +93,16 @@ def LinearEval(root):
     criterion = nn.CrossEntropyLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    best_acc = 0
     start = timeit.default_timer()
-    for epoch in range(1, 30):
+    for epoch in range(1, 100):
         train(model, device, train_loader, criterion, optimizer, epoch)
-        test(model, device, test_loader, criterion)
+        loss, acc = test(model, device, test_loader, criterion)
+        if acc > best_acc:
+          best_acc = acc
         stop = timeit.default_timer()
     print('Total time taken: {} seconds'.format(int(stop - start)) )
+    print('Best Acc: {}'.format(best_acc))
 
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
