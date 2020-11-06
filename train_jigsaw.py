@@ -16,6 +16,13 @@ from optimizer.optimizer_helper import get_optim_and_scheduler
 from utils.Logger import Logger
 import numpy as np
 
+import numpy as np
+import time
+import pkbar
+import json
+import os.path as osp
+from PIL import Image
+
 
 def get_args():
     parser = argparse.ArgumentParser(description="Script to launch jigsaw training", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -51,14 +58,10 @@ def get_args():
     parser.add_argument("--suffix", default="", help="Suffix for the logger")
     parser.add_argument("--nesterov", action='store_true', help="Use nesterov")
     
-    parser.add_argument("--jig_only", action = "store_true", help = "Disable classification loss")
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
 
     return parser.parse_args()
 
-
-# def compute_losses(net_output, jig_l, class_l):
-#     return F.cross_entropy(net_output[0], jig_l), F.cross_entropy(net_output[1], class_l)
 
 class Trainer:
     def __init__(self, args, device):
@@ -82,15 +85,22 @@ class Trainer:
             print(args.source)
         else:
             self.target_id = None
+        
         self.best_val_jigsaw = 0.0
-        self.best_jigsaw_loss = 10000
-        folder_name, logname = Logger.get_name_from_args(args)
-        self.save_folder = os.path.join("logs", folder_name, logname)
+        self.best_class_acc = 0.0
+
+        _, logname = Logger.get_name_from_args(args)
+        
+        self.folder_name = "%s/%s_to_%s/%s" % (args.folder_name, 
+            "-".join(sorted(args.source)), args.target, logname)
 
     def _do_epoch(self):
         criterion = nn.CrossEntropyLoss()
         self.model.train()
+        epoch_loss = 0
+        pbar = pkbar.Pbar(name = 'Epoch Progress', target = len(self.source_loader))
         for it, ((data, jig_l, class_l), d_idx) in enumerate(self.source_loader):
+            pbar.update(it)
             data, jig_l, class_l, d_idx = data.to(self.device), jig_l.to(self.device), class_l.to(self.device), d_idx.to(self.device)
             # absolute_iter_count = it + self.current_epoch * self.len_dataloader
             # p = float(absolute_iter_count) / self.args.epochs / self.len_dataloader
@@ -119,19 +129,10 @@ class Trainer:
             _, cls_pred = class_logit.max(dim=1)
             _, jig_pred = jigsaw_logit.max(dim=1)
 
-            if self.args.jig_only:
-                class_loss = torch.Tensor([0.0])
-                loss = jigsaw_loss
             # _, domain_pred = domain_logit.max(dim=1)
-            else:
-                loss = class_loss + jigsaw_loss * self.jig_weight  # + 0.1 * domain_loss
+            loss = class_loss + jigsaw_loss * self.jig_weight  # + 0.1 * domain_loss
 
-            if self.args.jig_only and (loss < self.best_jigsaw_loss):
-                self.best_jigsaw_loss = loss
-                print("Saving new best at epoch: {}".format(self.current_epoch))
-                torch.save(self.model.state_dict(), os.path.join(self.save_folder, 
-                    "best_model.pth"))
-
+            epoch_loss = epoch_loss + loss
             loss.backward()
             self.optimizer.step()
 
@@ -158,14 +159,23 @@ class Trainer:
                 jigsaw_acc = float(jigsaw_correct) / total
                 class_acc = float(class_correct) / total
 
-                if not self.args.jig_only and phase == "val" and (jigsaw_acc > self.best_val_jigsaw):
-                    self.best_val_jigsaw = jigsaw_acc
-                    print("Saving new best at epoch: {}".format(self.current_epoch))
-                    torch.save(self.model.state_dict(), os.path.join(self.save_folder, 
-                        "best_model.pth"))
-
                 self.logger.log_test(phase, {"jigsaw": jigsaw_acc, "class": class_acc})
                 self.results[phase][self.current_epoch] = class_acc
+
+        if (self.results['val'][self.current_epoch] > self.best_class_acc):
+            self.best_class_acc = self.results['val'][self.current_epoch]
+            print("Saving new best at epoch: {}".format(self.current_epoch))
+            self.save_model(os.path.join("logs", self.folder_name, 'best_model.pth'))
+
+        print("Saving latest at epoch: {}".format(self.current_epoch))
+        self.save_model(os.path.join("logs", self.folder_name, 'latest_model.pth'))
+
+    def save_model(self, file_path):
+        torch.save({'epoch': self.current_epoch,
+                    'model_state_dict': self.model.state_dict(),
+                    'optimizer_state_dict': self.optimizer.state_dict(),
+                    'best_val_acc': self.results['val'][self.current_epoch],
+                    'test_acc': self.results['test'][self.current_epoch]}, file_path)
 
     def do_test(self, loader):
         jigsaw_correct = 0
@@ -204,24 +214,31 @@ class Trainer:
     def do_training(self):
         self.logger = Logger(self.args, update_frequency=30)  # , "domain", "lambda"
         self.results = {"val": torch.zeros(self.args.epochs), "test": torch.zeros(self.args.epochs)}
+        
         for self.current_epoch in range(self.args.epochs):
+            start_time = time.time()
             self.scheduler.step()
             self.logger.new_epoch(self.scheduler.get_lr())
             self._do_epoch()
+            end_time = time.time()
+            print(f"Runtime of the epoch is {end_time - start_time}")
+        
         val_res = self.results["val"]
         test_res = self.results["test"]
         idx_best = val_res.argmax()
-        #print("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), test_res[idx_best], test_res.max()))
+        print("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), test_res[idx_best], test_res.max()))
         self.logger.save_best(test_res[idx_best], test_res.max())
+        
+        # Save Arguments
+        with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
+            json.dump(self.args.__dict__, f, indent=2)
+
         return self.logger, self.model
 
 
 def main():
     args = get_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    if args.jig_only:
-        print("Training only Jigsaw head, classification head disabled.")
 
     if args.stylized:
         print("Using txt_files/StylizedPACS/...")

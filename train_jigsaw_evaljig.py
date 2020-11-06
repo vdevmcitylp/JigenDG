@@ -1,5 +1,7 @@
-import argparse
+import warnings
+warnings.simplefilter(action = "ignore")
 
+import argparse
 import os
 
 import torch
@@ -61,12 +63,10 @@ def get_args():
     parser.add_argument("--nesterov", action='store_true', help="Use nesterov")
 
     parser.add_argument("--jig_only", action="store_true", help="Disable classification loss")
+    parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
 
     return parser.parse_args()
 
-
-# def compute_losses(net_output, jig_l, class_l):
-#     return F.cross_entropy(net_output[0], jig_l), F.cross_entropy(net_output[1], class_l)
 
 class Trainer:
     def __init__(self, args, device):
@@ -96,16 +96,16 @@ class Trainer:
 
         self.best_val_jigsaw = 0.0
         self.best_jigsaw_acc = 0.0
-        folder_name, logname = Logger.get_name_from_args(args)
+        _, logname = Logger.get_name_from_args(args)
 
-        self.folder_name = folder_name
-        self.save_folder = os.path.join("logs", folder_name, logname)
+        self.folder_name = "%s/%s_to_%s/%s" % (args.folder_name, 
+            "-".join(sorted(args.source)), args.target, logname)
 
     def _do_epoch(self):
         criterion = nn.CrossEntropyLoss()
         self.model.train()
         epoch_loss = 0
-        pbar = pkbar.Pbar(name='Epoch Progress', target=len(self.source_loader))
+        pbar = pkbar.Pbar(name = 'Epoch Progress', target = len(self.source_loader))
         for it, ((data, jig_l, class_l), d_idx) in enumerate(self.source_loader):
             pbar.update(it)
             data, jig_l, class_l, d_idx = data.to(self.device), jig_l.to(self.device), class_l.to(
@@ -183,10 +183,6 @@ class Trainer:
         print("Saving latest at epoch: {}".format(self.current_epoch))
         self.save_model(os.path.join("logs", self.folder_name, 'latest_model.pth'))
 
-        # Save Arguments
-        with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
-            json.dump(self.args.__dict__, f, indent=2)
-
     def save_model(self, file_path):
         torch.save({'epoch': self.current_epoch,
                     'model_state_dict': self.model.state_dict(),
@@ -246,6 +242,11 @@ class Trainer:
         print(
             "Best val %g, corresponding test %g - best test: %g" % (val_res.max(), test_res[idx_best], test_res.max()))
         self.logger.save_best(test_res[idx_best], test_res.max())
+
+        # Save Arguments
+        with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
+            json.dump(self.args.__dict__, f, indent=2)
+
         return self.logger, self.model
 
 
@@ -254,7 +255,6 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     trainer = Trainer(args, device)
     trainer.do_training()
-
 
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True

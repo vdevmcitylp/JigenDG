@@ -18,19 +18,27 @@
 # 				art_test.txt
 # 				...
 
-# Assumes the original author Github configuration, i.e. /home/fmc/data/PACS/kfold/photo/...
+# Assumes the original author Github configuration, i.e. /home/fmc/data/PACS/kfold/photo/... 
+
+while [[ "$#" -gt 0 ]]; do
+	case $1 in
+	    --dataset_root) dataset_root="/DATA1/vaasudev_narayanan/datasets"; shift ;;
+	    *) echo "Unknown parameter passed: $1"; exit 1 ;;
+	esac
+	shift
+done
+
 
 cd data/txt_lists
 
 pacs_domains=( "photo" "art" "cartoon" "sketch" )
 stylized_root="data/txt_lists/StylizedPACS"
 
-# Change from /home/fmc/... to datasets root
-dataset_root="/DATA1/vaasudev_narayanan/datasets"
+# Change from /home/fmc/... to dataset_oot
 
 for fname in *.txt 
 do 
-	sed -i "s@/home/fmc/data/@$dataset_root/@g" $fname
+	sed -i "s@/home/fmc/data/@${dataset_root}/@g" $fname
 done
 
 for domain in "${pacs_domains[@]}"

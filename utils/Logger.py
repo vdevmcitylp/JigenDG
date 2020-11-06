@@ -71,23 +71,24 @@ class Logger():
         folder_name = "%s_to_%s" % ("-".join(sorted(args.source)), args.target)
         if args.folder_name:
             folder_name = join(args.folder_name, folder_name)
-        name = "eps%d_bs%d_lr%g_class%d_jigClass%d_jigWeight%g" % (args.epochs, args.batch_size, args.learning_rate, args.n_classes,
-                                                                   args.jigsaw_n_classes, args.jig_weight)
-        # if args.ooo_weight > 0:
-        #     name += "_oooW%g" % args.ooo_weight
-        if args.train_all:
-            name += "_TAll"
-        if args.bias_whole_image:
-            name += "_bias%g" % args.bias_whole_image
-        if args.classify_only_sane:
-            name += "_classifyOnlySane"
-        if args.TTA:
-            name += "_TTA"
-        try:
-            name += "_entropy%g_jig_tW%g" % (args.entropy_weight, args.target_weight)
-        except AttributeError:
-            pass
+        name = ""
+        # name = "eps%d_bs%d_lr%g_class%d_jigClass%d_jigWeight%g" % (args.epochs, args.batch_size, args.learning_rate, args.n_classes,
+        #                                                            args.jigsaw_n_classes, args.jig_weight)
+        # # if args.ooo_weight > 0:
+        # #     name += "_oooW%g" % args.ooo_weight
+        # if args.train_all:
+        #     name += "_TAll"
+        # if args.bias_whole_image:
+        #     name += "_bias%g" % args.bias_whole_image
+        # if args.classify_only_sane:
+        #     name += "_classifyOnlySane"
+        # if args.TTA:
+        #     name += "_TTA"
+        # try:
+        #     name += "_entropy%g_jig_tW%g" % (args.entropy_weight, args.target_weight)
+        # except AttributeError:
+        #     pass
         if args.suffix:
             name += "_%s" % args.suffix
-        name += "_%d" % int(time() % 1000)
+        name += "%d" % int(time() % 10000)
         return folder_name, name

@@ -15,7 +15,7 @@ synth = 'synth'
 usps = 'usps'
 
 vlcs_datasets = ["CALTECH", "LABELME", "PASCAL", "SUN"]
-pacs_datasets = ["art_painting", "cartoon", "photo", "sketch"]
+pacs_datasets = ["art", "cartoon", "photo", "sketch"]
 office_datasets = ["amazon", "dslr", "webcam"]
 digits_datasets = [mnist, mnist, svhn, usps]
 available_datasets = office_datasets + pacs_datasets + vlcs_datasets + digits_datasets
@@ -63,6 +63,7 @@ def get_train_dataloader(args, patches):
         if args.stylized:
             name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
                 "{}_target".format(args.target), '%s_train.txt' % dname), args.val_size)
+            # print(name_train)
         else:
             name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % dname), args.val_size)
         train_dataset = JigsawDataset(name_train, labels_train, patches=patches, img_transformer=img_transformer,
@@ -70,14 +71,8 @@ def get_train_dataloader(args, patches):
         if limit:
             train_dataset = Subset(train_dataset, limit)
         datasets.append(train_dataset)
-        if args.jig_only:
-          val_datasets.append(
-            JigsawDataset(name_val, labels_val, patches=patches, img_transformer=img_transformer,
-                                      tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
-          )
-        else:
-          val_datasets.append(
-              JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args),
+    
+        val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args),
                               patches=patches, jig_classes=args.jigsaw_n_classes))
     dataset = ConcatDataset(datasets)
     val_dataset = ConcatDataset(val_datasets)

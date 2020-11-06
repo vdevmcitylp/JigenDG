@@ -1,3 +1,6 @@
+import argparse
+import random
+
 import os
 import torch
 import torch.nn as nn
@@ -12,6 +15,18 @@ import torch.optim as optim
 import timeit
 import pickle
 import os.path as osp
+
+def set_seed(seed):
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    os.environ["PYTHONHASHSEED"] = str(seed)
 
 
 class LinearEvalDataset(Dataset):
@@ -63,10 +78,10 @@ def train(model, device, train_loader, criterion, optimizer, epoch):
 
         loss.backward()
         optimizer.step()
-        if batch_idx % 20 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+        # if batch_idx % 100 == 0:
+        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        #         epoch, batch_idx * len(data), len(train_loader.dataset),
+        #         100. * batch_idx / len(train_loader), loss.item()))
 
 
 def test(model, device, test_loader, criterion):
@@ -83,9 +98,9 @@ def test(model, device, test_loader, criterion):
 
     test_loss /= len(test_loader.dataset)
     test_acc = correct / len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    # print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    #     test_loss, correct, len(test_loader.dataset),
+    #     100. * correct / len(test_loader.dataset)))
     return test_loss, test_acc
 
 def shuffle(x, y):
@@ -136,12 +151,48 @@ def LinearEval(root, split=None):
     print('Total time taken: {} seconds'.format(int(stop - start)) )
     print('Best Acc: {}'.format(best_acc))
     
+    return best_acc
     
-if __name__ == "__main__":
-    torch.backends.cudnn.benchmark = True
+def get_args():
 
-    #Location of the train and test pkl files - with 50-50 split
-    #Use split data function to create the splits
-    data_root = '/content/drive/My Drive/Codes/JigenDG/logs/cartoon_target_stylizedjigsaw/art-photo-sketch_to_cartoon/'
-    split = 0.1
-    LinearEval(data_root, split=split)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", help = "Source", nargs = '+')
+    parser.add_argument("--target", help = "Target")
+    
+    parser.add_argument("--exp_type", choices = ["vanilla-jigsaw", "stylized-jigsaw"])
+    parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
+        will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
+
+    args = parser.parse_args()
+
+    return args
+
+if __name__ == "__main__":
+    
+    set_seed(1)
+
+    args = get_args()
+
+    # "vanilla-jigsaw/art-photo-sketch_to_cartoon/6068/" 
+    exp_folder = "%s/%s_to_%s/%s/" % (args.exp_type, 
+            "-".join(sorted(args.source)), args.target, args.run_id) 
+
+    logs_root = "/DATA1/vaasudev_narayanan/repositories/JigenDG/logs"
+    logs_folder = osp.join(logs_root, exp_folder)
+    
+    # Splitting target domain (logs_folder/act_label.pkl first to get 50-50 split)
+    # Saves train_data.pkl and test_data.pkl in the same logs_folder
+    split_data(logs_folder, split = 0.5)
+    
+    splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+
+    best_accs_dict = {}
+
+    for split in splits:
+        best_split_acc = LinearEval(logs_folder, split = split)
+        best_accs_dict[split] = best_split_acc
+
+    print(best_accs_dict)
+
+    # python LinearEval.py --source art photo sketch --target cartoon --exp_type vanilla-jigsaw --run_id 6068
+    # Assumes act_label.pkl is stored at logs_root/vanilla-jigsaw/art-photo-sketch_to_cartoon/6068
