@@ -168,7 +168,7 @@ def evaluate_clustering(model, data, labels):
 	acc_v, acc_i = calculate_acc(clusters, labels)
 	nmi_v = calculate_nmi(clusters, labels)
 	ari_v = calculate_ari(clusters, labels)
-	print("Accuracy %f NMI %f ARI %f" % (acc_v, nmi_v, ari_v))
+	print("Accuracy %f NMI %f ARI %f" % (acc_v * 100, nmi_v, ari_v))
 	return acc_v, nmi_v, ari_v
 
 
@@ -187,6 +187,9 @@ def load_source_data(logs_folder, source_domains):
 		if features.any():
 			features = np.append(features, data["features"], axis = 0)
 			labels = np.append(labels, data["labels"], axis = 0)
+		else:
+			features = data["features"]
+			labels = data["labels"]
 
 	return features, labels
 
@@ -210,10 +213,10 @@ def get_args():
 	parser.add_argument("--source", help = "Source Domains", nargs = '+')
 	parser.add_argument("--target", help = "Target Domain")
 
-	parser.add_argument("--source_clustering", type = bool, help = "If true to cluster on source domains \
+	parser.add_argument("--source_clustering", action = "store_true", help = "If true to cluster on source domains \
 		and evaluate on target domain")
 
-	parser.add_argument("--target_clustering", type = bool, help = "Cluster on target domain images")
+	parser.add_argument("--target_clustering", action = "store_true", help = "Cluster on target domain images")
 
 	parser.add_argument("--split", type = float, help = "Proportion of target data used for clustering")
 
@@ -233,21 +236,21 @@ def main(args, logs_root):
 
 	logs_folder = osp.join(logs_root, exp_folder)
 	
-	target_features, target_labels = load_target_data(logs_folder, target)
+	target_features, target_labels = load_target_data(logs_folder, args.target)
 	
 	if args.source_clustering:
 		
 		print("Clustering on source domains ...")
-		assert args.target_clustering == None
+		assert args.target_clustering == False
 
-		source_features, source_labels = load_source_data(logs_folder, source)
+		source_features, source_labels = load_source_data(logs_folder, args.source)
 
 		model = cluster(source_features)
 
 	if args.target_clustering:
 		
 		print("Clustering on target domain images ...")
-		assert args.source_clustering == None
+		assert args.source_clustering == False
 
 		# print("Using {}% of target domain images for clustering".format(args.split * 100))
 
