@@ -72,8 +72,15 @@ def get_train_dataloader(args, patches):
             train_dataset = Subset(train_dataset, limit)
         datasets.append(train_dataset)
     
-        val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args),
+        if args.jig_only:
+            val_datasets.append(
+                JigsawDataset(name_val, labels_val, patches=patches, img_transformer=img_transformer, 
+                    tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, 
+                    bias_whole_image=args.bias_whole_image))
+        else:
+            val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args),
                               patches=patches, jig_classes=args.jigsaw_n_classes))
+    
     dataset = ConcatDataset(datasets)
     val_dataset = ConcatDataset(val_datasets)
     loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
