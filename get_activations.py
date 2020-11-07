@@ -43,6 +43,8 @@ def get_args():
     parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, model will be loaded from and \
         activations will be saved to args.exp_type/s1-s2-s3_to_s4/args.run_id")
 
+    parser.add_argument("--generate_for", type = str, help = "Generate activations for this domain")
+
     return parser.parse_args()
 
 class Trainer:
@@ -53,8 +55,18 @@ class Trainer:
             classes=args.n_classes)
         self.model = model.to(device)
     
+        self.exp_type = "%s/%s_to_%s/%s" % (args.exp_type, 
+            "-".join(sorted(args.source)), args.target, args.run_id)
+
+        self.model_path = osp.join('logs', self.exp_type, 'best_model.pth')
+        
+        print("Loading best_model.pth from {}".format(self.model_path))
+        
+        self.args.target = self.args.generate_for
+
         self.target_loader = data_helper.get_val_dataloader(args, 
             patches=model.is_patch_based())
+
         print("Dataset size: test %d" % (len(self.target_loader.dataset)))
 
         self.n_classes = args.n_classes
@@ -65,10 +77,6 @@ class Trainer:
         else:
             self.target_id = None
         
-        self.exp_type = "%s/%s_to_%s/%s" % (args.exp_type, 
-            "-".join(sorted(args.source)), args.target, args.run_id)
-
-        print("Loading best_model.pth from {}".format(self.exp_type))
 
 
     def hook(self, model, input, output):
@@ -78,9 +86,8 @@ class Trainer:
 
     def get_features(self):
         loader = self.target_loader
-        model_path = osp.join('logs', self.exp_type, 'best_model.pth')
         self.activations = []
-        sd = torch.load(model_path)
+        sd = torch.load(self.model_path)
         self.model.load_state_dict(sd['model_state_dict'])
         self.model.avgpool.register_forward_hook(self.hook)
         self.model.eval()
@@ -97,10 +104,10 @@ class Trainer:
         target_data = {}
         target_data['features'] = self.activations
         target_data['labels'] = labels
-        with open(osp.join('logs', self.exp_type, 'act_labels.pkl'), 'wb') as handle:
+        with open(osp.join('logs', self.exp_type, 'act_labels_{}.pkl'.format(self.args.target)), 'wb') as handle:
           pickle.dump(target_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        print("Activations saved to logs/{}/act_labels.pkl".format(self.exp_type))
+        print("Activations saved to logs/{}/act_labels_{}.pkl".format(self.exp_type, self.args.target))
 
         return self.activations 
       

@@ -41,23 +41,105 @@ python train_jigsaw_evaljig.py --stylized --jig_only --folder_name stylized-jigs
 
 #### Vanilla
 
-python get_activations.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 9095 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+Sketch Target: 9095
 
-python get_activations.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 9132 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 9095 --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
 
-python get_activations.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 2126 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 9095 --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
 
-python get_activations.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 2138 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 9095 --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 9095 --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+
+<hr>
+
+Cartoon Target: 9132
+
+python get_activations.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 9132 --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 9132 --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 9132 --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 9132 --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+
+<hr>
+
+Art Target: 2126
+
+python get_activations.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 2126 --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 2126 --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 2126 --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 2126 --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+
+<hr>
+
+Photo Target: 2138
+
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 2138 --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 2138 --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 2138 --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+python get_activations.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 2138 --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222
+
+
+<hr>
 
 #### Stylized
 
-python get_activations.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 1530 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized
+Sketch Target: 1530
 
-python get_activations.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 1587 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 1530 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for sketch
 
-python get_activations.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 6093 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 1530 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for cartoon
 
-python get_activations.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 6065 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 1530 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for art
+
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 1530 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for photo
+
+<hr>
+
+Cartoon Target
+
+python get_activations.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 1587 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for sketch
+
+python get_activations.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 1587 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for cartoon
+
+python get_activations.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 1587 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for art
+
+python get_activations.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 1587 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for photo
+
+<hr>
+
+Art Target
+
+python get_activations.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 6093 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for sketch
+
+python get_activations.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 6093 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for cartoon
+
+python get_activations.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 6093 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for art
+
+python get_activations.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 6093 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for photo
+
+<hr>
+
+Photo Target
+
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 6055 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for sketch
+
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 6055 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for cartoon
+
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 6055 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for art
+
+python get_activations.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 6055 --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes 30 --image_size 222 --stylized --generate_for photo
 
 <hr>
 
@@ -87,22 +169,46 @@ python LinearEval.py --exp_type stylized-jigsaw --source art cartoon sketch --ta
 
 ### Clustering Evaluation
 
-#### Vanilla
+#### Vanilla Source Clustering
 
-python cluster_eval.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 8561
+python cluster_eval.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 8561 --source_clustering
 
-python cluster_eval.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 8542
+python cluster_eval.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 8542 --source_clustering
 
-python cluster_eval.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 5628
+python cluster_eval.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 5628 --source_clustering
 
-python cluster_eval.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 5513
+python cluster_eval.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 5513 --source_clustering
 
-#### Stylized
 
-python cluster_eval.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 9401
+#### Vanilla Target Clustering
 
-python cluster_eval.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 9428
+python cluster_eval.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 8561 --target_clustering
 
-python cluster_eval.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 2714
+python cluster_eval.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 8542 --target_clustering
 
-python cluster_eval.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 2697
+python cluster_eval.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 5628 --target_clustering
+
+python cluster_eval.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 5513 --target_clustering
+
+
+#### Stylized Source Clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 9401 --source_clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 9428 --source_clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 2714 --source_clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 2697 --source_clustering
+
+
+#### Stylized Target Clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 9401 --target_clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 9428 --target_clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 2714 --target_clustering
+
+python cluster_eval.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 2697 --target_clustering
+

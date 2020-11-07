@@ -4,3 +4,5 @@ data/txt_lists/*
 */__pycache__/*
 .idea/*
 logs/*
+data/txt_lists/*
+run_id_meta.md
