@@ -58,7 +58,9 @@ def get_args():
     parser.add_argument("--suffix", default="", help="Suffix for the logger")
     parser.add_argument("--nesterov", action='store_true', help="Use nesterov")
     
+    parser.add_argument("--jig_only", action = "store_true", help = "Disable classification loss")
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
+    parser.add_argument("--deep_all", action = "store_true", help = "DeepAll, disable jigsaw loss")
 
     return parser.parse_args()
 
@@ -129,8 +131,12 @@ class Trainer:
             _, cls_pred = class_logit.max(dim=1)
             _, jig_pred = jigsaw_logit.max(dim=1)
 
-            # _, domain_pred = domain_logit.max(dim=1)
-            loss = class_loss + jigsaw_loss * self.jig_weight  # + 0.1 * domain_loss
+            if self.args.deep_all:
+                jigsaw_loss = torch.Tensor([0.0])
+                loss = class_loss    
+            else:
+                loss = class_loss + jigsaw_loss * self.jig_weight  # + 0.1 * domain_loss
+                # _, domain_pred = domain_logit.max(dim=1)
 
             epoch_loss = epoch_loss + loss
             loss.backward()
@@ -232,6 +238,11 @@ class Trainer:
         # Save Arguments
         with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
             json.dump(self.args.__dict__, f, indent=2)
+
+        # Save results
+        with open(osp.join('logs', self.folder_name, 'results.txt'), 'w') as f:
+            f.write("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), 
+                test_res[idx_best], test_res.max()))
 
         return self.logger, self.model
 

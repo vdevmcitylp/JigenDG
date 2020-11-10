@@ -109,8 +109,8 @@ def shuffle(x, y):
     y = y[perm]
     return x,y
 
-def split_data(root, split):
-    pkl_file = osp.join(root, 'act_labels.pkl')
+def split_data(root, split, target):
+    pkl_file = osp.join(root, 'act_labels_{}.pkl'.format(target))
     with open(pkl_file, 'rb') as handle:
           data = pickle.load(handle)
     n = int(split*len(data['labels']))
@@ -148,8 +148,8 @@ def LinearEval(root, split=None):
         if acc > best_acc:
           best_acc = acc
         stop = timeit.default_timer()
-    print('Total time taken: {} seconds'.format(int(stop - start)) )
-    print('Best Acc: {}'.format(best_acc))
+    # print('Total time taken: {} seconds'.format(int(stop - start)) )
+    # print('Best Acc: {}'.format(best_acc))
     
     return best_acc
     
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     
     # Splitting target domain (logs_folder/act_label.pkl first to get 50-50 split)
     # Saves train_data.pkl and test_data.pkl in the same logs_folder
-    split_data(logs_folder, split = 0.5)
+    split_data(logs_folder, split = 0.5, target = args.target)
     
     splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
 
