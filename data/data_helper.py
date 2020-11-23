@@ -3,7 +3,7 @@ from os.path import join, dirname
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
-
+import numpy as np
 from data import StandardDataset
 from data.JigsawLoader import JigsawDataset, JigsawTestDataset, get_split_dataset_info, _dataset_info, JigsawTestDatasetMultiple
 from data.concat_dataset import ConcatDataset
@@ -17,8 +17,9 @@ usps = 'usps'
 vlcs_datasets = ["CALTECH", "LABELME", "PASCAL", "SUN"]
 pacs_datasets = ["art", "cartoon", "photo", "sketch"]
 office_datasets = ["amazon", "dslr", "webcam"]
+officehome_datasets = ["art", "clipart", "product", "realworld"]
 digits_datasets = [mnist, mnist, svhn, usps]
-available_datasets = office_datasets + pacs_datasets + vlcs_datasets + digits_datasets
+available_datasets = office_datasets + pacs_datasets + vlcs_datasets + digits_datasets + officehome_datasets
 #office_paths = {dataset: "/home/enoon/data/images/office/%s" % dataset for dataset in office_datasets}
 #pacs_paths = {dataset: "/home/enoon/data/images/PACS/kfold/%s" % dataset for dataset in pacs_datasets}
 #vlcs_paths = {dataset: "/home/enoon/data/images/VLCS/%s/test" % dataset for dataset in pacs_datasets}
@@ -61,26 +62,29 @@ def get_train_dataloader(args, patches):
     limit = args.limit_source
     for dname in dataset_list:
         if args.stylized:
-            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
+            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', 
                 "{}_target".format(args.target), '%s_train.txt' % dname), args.val_size)
             # print(name_train)
+            
         else:
-            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % dname), args.val_size)
+            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'VanillaOfficeHome' ,'%s_train.txt' % dname), args.val_size)
+        
         train_dataset = JigsawDataset(name_train, labels_train, patches=patches, img_transformer=img_transformer,
                                       tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
+        
+        
         if limit:
             train_dataset = Subset(train_dataset, limit)
         datasets.append(train_dataset)
-    
         if args.jig_only:
-            val_datasets.append(
-                JigsawDataset(name_val, labels_val, patches=patches, img_transformer=img_transformer, 
-                    tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, 
-                    bias_whole_image=args.bias_whole_image))
+            val_datasets.append(JigsawDataset(name_val, labels_val, patches=patches, img_transformer=img_transformer, 
+                              tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image))
         else:
-            val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args),
+            val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args), 
                               patches=patches, jig_classes=args.jigsaw_n_classes))
-    
+
+        #val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args),
+                           #   patches=patches, jig_classes=args.jigsaw_n_classes))
     dataset = ConcatDataset(datasets)
     val_dataset = ConcatDataset(val_datasets)
     loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
@@ -90,10 +94,10 @@ def get_train_dataloader(args, patches):
 
 def get_val_dataloader(args, patches=False):
     if args.stylized:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', 
                 "{}_target".format(args.target), '%s_test.txt' % args.target))
     else:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', '%s_test.txt' % args.target))
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists','VanillaOfficeHome', '%s_test.txt' % args.target))
     
     img_tr = get_val_transformer(args)
     val_dataset = JigsawTestDataset(names, labels, patches=patches, img_transformer=img_tr, jig_classes=args.jigsaw_n_classes)
@@ -107,10 +111,10 @@ def get_val_dataloader(args, patches=False):
 
 def get_jigsaw_val_dataloader(args, patches=False):
     if args.stylized:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', 
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', 
                 "{}_target".format(args.target), '%s_test.txt' % args.target))
     else:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', '%s_test.txt' % args.target))
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'VanillaOfficeHome', '%s_test.txt' % args.target))
 
     img_tr = [transforms.Resize((args.image_size, args.image_size))]
     tile_tr = [transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
@@ -150,10 +154,10 @@ def get_val_transformer(args):
 def get_target_jigsaw_loader(args):
     img_transformer, tile_transformer = get_train_transformers(args)
     if args.stylized:
-        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedPACS', "{}_target".format(args.target), 
+        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', "{}_target".format(args.target), 
             '%s_train.txt' % args.target), 0)
     else:
-        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', '%s_train.txt' % args.target), 0)
+        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'VanillaOfficeHome', '%s_train.txt' % args.target), 0)
     dataset = JigsawDataset(name_train, labels_train, patches=False, img_transformer=img_transformer,
                             tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
     loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
