@@ -52,7 +52,6 @@ class Subset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.indices)
 
-
 def get_train_dataloader(args, patches):
     dataset_list = args.source
     assert isinstance(dataset_list, list)
@@ -62,12 +61,12 @@ def get_train_dataloader(args, patches):
     limit = args.limit_source
     for dname in dataset_list:
         if args.stylized:
-            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', 
+            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'Stylized'+args.dataset, 
                 "{}_target".format(args.target), '%s_train.txt' % dname), args.val_size)
             # print(name_train)
             
         else:
-            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'VanillaOfficeHome' ,'%s_train.txt' % dname), args.val_size)
+            name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'Vanilla'+ args.dataset ,'%s_train.txt' % dname), args.val_size)
         
         train_dataset = JigsawDataset(name_train, labels_train, patches=patches, img_transformer=img_transformer,
                                       tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
@@ -94,10 +93,10 @@ def get_train_dataloader(args, patches):
 
 def get_val_dataloader(args, patches=False):
     if args.stylized:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', 
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'Stylized'+args.dataset, 
                 "{}_target".format(args.target), '%s_test.txt' % args.target))
     else:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists','VanillaOfficeHome', '%s_test.txt' % args.target))
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists','Vanilla'+args.dataset, '%s_test.txt' % args.target))
     
     img_tr = get_val_transformer(args)
     val_dataset = JigsawTestDataset(names, labels, patches=patches, img_transformer=img_tr, jig_classes=args.jigsaw_n_classes)
@@ -111,10 +110,10 @@ def get_val_dataloader(args, patches=False):
 
 def get_jigsaw_val_dataloader(args, patches=False):
     if args.stylized:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', 
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'Stylized'+args.dataset, 
                 "{}_target".format(args.target), '%s_test.txt' % args.target))
     else:
-        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'VanillaOfficeHome', '%s_test.txt' % args.target))
+        names, labels = _dataset_info(join(dirname(__file__), 'txt_lists', 'Vanilla'+args.dataset, '%s_test.txt' % args.target))
 
     img_tr = [transforms.Resize((args.image_size, args.image_size))]
     tile_tr = [transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
@@ -154,10 +153,10 @@ def get_val_transformer(args):
 def get_target_jigsaw_loader(args):
     img_transformer, tile_transformer = get_train_transformers(args)
     if args.stylized:
-        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'StylizedOfficeHome', "{}_target".format(args.target), 
+        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'Stylized'+args.dataset, "{}_target".format(args.target), 
             '%s_train.txt' % args.target), 0)
     else:
-        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'VanillaOfficeHome', '%s_train.txt' % args.target), 0)
+        name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'Vanilla'+args.dataset, '%s_train.txt' % args.target), 0)
     dataset = JigsawDataset(name_train, labels_train, patches=False, img_transformer=img_transformer,
                             tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
     loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
