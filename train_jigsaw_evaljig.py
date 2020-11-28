@@ -3,7 +3,7 @@ warnings.simplefilter(action = "ignore")
 
 import argparse
 import os
-
+import random
 import torch
 from IPython.core.debugger import set_trace
 from torch import nn
@@ -20,6 +20,18 @@ import pkbar
 import json
 import os.path as osp
 from PIL import Image
+
+def set_seed(seed):
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    os.environ["PYTHONHASHSEED"] = str(seed)
 
 
 def get_args():
@@ -64,6 +76,8 @@ def get_args():
 
     parser.add_argument("--jig_only", action="store_true", help="Disable classification loss")
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
+    parser.add_argument("--seed", type=int, default=1, help="Random seed")
+    parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name sued for training")
 
     return parser.parse_args()
 
@@ -247,18 +261,19 @@ class Trainer:
         with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
             json.dump(self.args.__dict__, f, indent=2)
 
-        # Save results
-        with open(osp.join('logs', self.folder_name, 'results.txt'), 'w') as f:
-            f.write("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), 
-                test_res[idx_best], test_res.max()))
-
         return self.logger, self.model
 
 
 def main():
     args = get_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    set_seed(args.seed)
+    if args.stylized:
+        print("Using txt_files/Stylized"+args.dataset)
+    else:
+        print("Using txt_files/Vanilla"+args.dataset)
     trainer = Trainer(args, device)
+    
     trainer.do_training()
 
 if __name__ == "__main__":
