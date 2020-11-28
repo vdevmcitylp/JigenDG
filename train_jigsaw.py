@@ -3,7 +3,7 @@ warnings.simplefilter(action = "ignore")
 
 import argparse
 import os
-
+import random
 import torch
 from IPython.core.debugger import set_trace
 from torch import nn
@@ -23,6 +23,17 @@ import json
 import os.path as osp
 from PIL import Image
 
+def set_seed(seed):
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    os.environ["PYTHONHASHSEED"] = str(seed)
 
 def get_args():
     parser = argparse.ArgumentParser(description="Script to launch jigsaw training", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -58,9 +69,11 @@ def get_args():
     parser.add_argument("--suffix", default="", help="Suffix for the logger")
     parser.add_argument("--nesterov", action='store_true', help="Use nesterov")
     
-    parser.add_argument("--jig_only", action = "store_true", help = "Disable classification loss")
+    parser.add_argument("--jig_only", action="store_true", help="Disable classification loss")
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
-    parser.add_argument("--deep_all", action = "store_true", help = "DeepAll, disable jigsaw loss")
+    parser.add_argument("--seed", type=int, default=1, help="Random seed")
+    parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name sued for training")
+
 
     return parser.parse_args()
 
@@ -131,12 +144,8 @@ class Trainer:
             _, cls_pred = class_logit.max(dim=1)
             _, jig_pred = jigsaw_logit.max(dim=1)
 
-            if self.args.deep_all:
-                jigsaw_loss = torch.Tensor([0.0])
-                loss = class_loss    
-            else:
-                loss = class_loss + jigsaw_loss * self.jig_weight  # + 0.1 * domain_loss
-                # _, domain_pred = domain_logit.max(dim=1)
+            # _, domain_pred = domain_logit.max(dim=1)
+            loss = class_loss + jigsaw_loss * self.jig_weight  # + 0.1 * domain_loss
 
             epoch_loss = epoch_loss + loss
             loss.backward()
@@ -239,11 +248,6 @@ class Trainer:
         with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
             json.dump(self.args.__dict__, f, indent=2)
 
-        # Save results
-        with open(osp.join('logs', self.folder_name, 'results.txt'), 'w') as f:
-            f.write("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), 
-                test_res[idx_best], test_res.max()))
-
         return self.logger, self.model
 
 
@@ -252,8 +256,11 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if args.stylized:
-        print("Using txt_files/StylizedPACS/...")
+        print("Using txt_files/Stylized"+args.dataset)
+    else:
+        print("Using txt_files/Vanilla"+args.dataset)
 
+    set_seed(args.seed)
     trainer = Trainer(args, device)
     trainer.do_training()
 
