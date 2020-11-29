@@ -3,7 +3,7 @@ warnings.simplefilter(action = "ignore")
 
 import argparse
 import os
-
+import random
 import torch
 from IPython.core.debugger import set_trace
 from torch import nn
@@ -23,6 +23,17 @@ import json
 import os.path as osp
 from PIL import Image
 
+def set_seed(seed):
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    os.environ["PYTHONHASHSEED"] = str(seed)
 
 def get_args():
     parser = argparse.ArgumentParser(description="Script to launch jigsaw training", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -60,6 +71,8 @@ def get_args():
     
     parser.add_argument("--jig_only", action = "store_true", help = "Disable classification loss")
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
+    parser.add_argument("--seed", type = int, choices = [1, 2, 3], help = "Random seed")
+    parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help = "Dataset name used for training")
     parser.add_argument("--deep_all", action = "store_true", help = "DeepAll, disable jigsaw loss")
 
     return parser.parse_args()
@@ -252,8 +265,14 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if args.stylized:
-        print("Using txt_files/StylizedPACS/...")
+        print("Using txt_files/Stylized" + args.dataset)
+    else:
+        print("Using txt_files/Vanilla" + args.dataset)
 
+    if args.deep_all:
+        print("DeepAll training")
+
+    set_seed(args.seed)
     trainer = Trainer(args, device)
     trainer.do_training()
 
