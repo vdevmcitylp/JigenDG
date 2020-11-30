@@ -90,6 +90,17 @@ import pickle
 # 				labels = data['labels']
 # 		return features, labels
 
+def set_seed(seed):
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    os.environ["PYTHONHASHSEED"] = str(seed)
 
 def acc(ypred, y, return_idx=False):
 	"""
@@ -159,7 +170,7 @@ def calculate_ari(predict_labels, true_labels):
 
 def cluster(data):
 
-	kmeans = KMeans(n_clusters = 7, max_iter = 300, random_state = 1).fit(data)
+	kmeans = KMeans(n_clusters = 7, max_iter = 300).fit(data)
 	return kmeans
 
 def evaluate_clustering(model, data, labels):
@@ -225,6 +236,8 @@ def get_args():
 	parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
         will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
 
+	parser.add_argument("--seed", type = int, choices = [1, 2, 3])
+
 	args = parser.parse_args()
 
 	return args
@@ -265,5 +278,7 @@ if __name__ == "__main__":
 	args = get_args()
 
 	logs_root = "/DATA1/vaasudev_narayanan/repositories/JigenDG/logs"
+
+	set_seed(args.seed)
 	
 	main(args, logs_root)
