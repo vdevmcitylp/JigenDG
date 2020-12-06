@@ -78,6 +78,7 @@ def get_args():
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
     parser.add_argument("--seed", type=int, default=1, help="Random seed")
     parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name sued for training")
+    parser.add_argument("--mix_up", action = "store_true", help = "Using Domain MixUp")
 
     return parser.parse_args()
 
@@ -115,6 +116,26 @@ class Trainer:
         self.folder_name = "%s/%s_to_%s/%s" % (args.folder_name, 
             "-".join(sorted(args.source)), args.target, logname)
 
+    def mixup_data(self, x, y_jig, y_class, alpha=1.0, use_cuda=True):
+        '''Returns mixed inputs, pairs of targets, and lambda'''
+        if alpha > 0:
+            lam = np.random.beta(alpha, alpha)
+        else:
+            lam = 1
+        batch_size = x.size()[0]
+        if use_cuda:
+            index = torch.randperm(batch_size).cuda()
+        else:
+            index = torch.randperm(batch_size)
+        mixed_x = lam * x + (1 - lam) * x[index, :]
+        y_jig_a, y_jig_b = y_jig, y_jig[index]
+        y_class_a, y_class_b = y_class, y_class[index]
+
+        return mixed_x, y_jig_a, y_jig_b, y_class_a, y_class_b, lam
+
+    def mixup_criterion(self, criterion, pred, y_a, y_b, lam):
+        return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
+
     def _do_epoch(self):
         criterion = nn.CrossEntropyLoss()
         self.model.train()
@@ -132,9 +153,15 @@ class Trainer:
             # print("Shutting down LAMBDA to prevent implosion")
 
             self.optimizer.zero_grad()
+            if self.args.mix_up:
+                data, y_jig_a, y_jig_b, y_class_a, y_class_b, lam = self.mixup_data(data, jig_l, class_l)
 
             jigsaw_logit, class_logit = self.model(data)  # , lambda_val=lambda_val)
-            jigsaw_loss = criterion(jigsaw_logit, jig_l)
+
+            if self.args.mix_up:
+                jigsaw_loss = self.mixup_criterion(criterion,jigsaw_logit, y_jig_a, y_jig_b, lam)
+            else:
+                jigsaw_loss = criterion(jigsaw_logit, jig_l)
             # domain_loss = criterion(domain_logit, d_idx)
             # domain_error = domain_loss.item()
             if self.only_non_scrambled:
@@ -148,6 +175,10 @@ class Trainer:
                 class_loss = criterion(class_logit[d_idx != self.target_id], class_l[d_idx != self.target_id])
             else:
                 class_loss = criterion(class_logit, class_l)
+
+            if self.args.mix_up:
+                class_loss = self.mixup_criterion(criterion,class_logit, y_class_a, y_class_b, lam) 
+
             _, cls_pred = class_logit.max(dim=1)
             _, jig_pred = jigsaw_logit.max(dim=1)
             # _, domain_pred = domain_logit.max(dim=1)
@@ -268,12 +299,8 @@ def main():
     args = get_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     set_seed(args.seed)
-    if args.stylized:
-        print("Using txt_files/Stylized"+args.dataset)
-    else:
-        print("Using txt_files/Vanilla"+args.dataset)
+
     trainer = Trainer(args, device)
-    
     trainer.do_training()
 
 if __name__ == "__main__":
