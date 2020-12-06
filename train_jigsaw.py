@@ -74,6 +74,7 @@ def get_args():
     parser.add_argument("--seed", type = int, choices = [1, 2, 3], help = "Random seed")
     parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help = "Dataset name used for training")
     parser.add_argument("--deep_all", action = "store_true", help = "DeepAll, disable jigsaw loss")
+    parser.add_argument("--mix_up", action = "store_true", help = "Using Domain MixUp")
 
     return parser.parse_args()
 
@@ -108,6 +109,25 @@ class Trainer:
         
         self.folder_name = "%s/%s_to_%s/%s" % (args.folder_name, 
             "-".join(sorted(args.source)), args.target, logname)
+    def mixup_data(self, x, y_jig, y_class, alpha=1.0, use_cuda=True):
+        '''Returns mixed inputs, pairs of targets, and lambda'''
+        if alpha > 0:
+            lam = np.random.beta(alpha, alpha)
+        else:
+            lam = 1
+        batch_size = x.size()[0]
+        if use_cuda:
+            index = torch.randperm(batch_size).cuda()
+        else:
+            index = torch.randperm(batch_size)
+        mixed_x = lam * x + (1 - lam) * x[index, :]
+        y_jig_a, y_jig_b = y_jig, y_jig[index]
+        y_class_a, y_class_b = y_class, y_class[index]
+
+        return mixed_x, y_jig_a, y_jig_b, y_class_a, y_class_b, lam
+
+    def mixup_criterion(self, criterion, pred, y_a, y_b, lam):
+        return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
 
     def _do_epoch(self):
         criterion = nn.CrossEntropyLoss()
@@ -126,8 +146,15 @@ class Trainer:
 
             self.optimizer.zero_grad()
 
+            if self.args.mix_up:
+                data, y_jig_a, y_jig_b, y_class_a, y_class_b, lam = self.mixup_data(data, jig_l, class_l)
+
             jigsaw_logit, class_logit = self.model(data)  # , lambda_val=lambda_val)
-            jigsaw_loss = criterion(jigsaw_logit, jig_l)
+            if self.args.mix_up:
+                jigsaw_loss = self.mixup_criterion(criterion,jigsaw_logit, y_jig_a, y_jig_b, lam)
+            else:
+                jigsaw_loss = criterion(jigsaw_logit, jig_l)
+            
             # domain_loss = criterion(domain_logit, d_idx)
             # domain_error = domain_loss.item()
             if self.only_non_scrambled:
@@ -141,6 +168,10 @@ class Trainer:
                 class_loss = criterion(class_logit[d_idx != self.target_id], class_l[d_idx != self.target_id])
             else:
                 class_loss = criterion(class_logit, class_l)
+
+            if self.args.mix_up:
+                class_loss = self.mixup_criterion(criterion,class_logit, y_class_a, y_class_b, lam)
+
             _, cls_pred = class_logit.max(dim=1)
             _, jig_pred = jigsaw_logit.max(dim=1)
 
