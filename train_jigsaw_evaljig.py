@@ -261,6 +261,11 @@ class Trainer:
         with open(osp.join('logs', self.folder_name, 'args.txt'), 'w') as f:
             json.dump(self.args.__dict__, f, indent=2)
 
+        # Save results
+        with open(osp.join('logs', self.folder_name, 'results.txt'), 'w') as f:
+            f.write("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), 
+                test_res[idx_best], test_res.max()))
+
         return self.logger, self.model
 
 
