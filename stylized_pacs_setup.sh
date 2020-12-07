@@ -53,3 +53,10 @@ do
 	done
 
 done
+
+mkdir VanillaPACS
+for domain in "${pacs_domains[@]}"
+do
+	mv "${domain}_train.txt" "VanillaPACS/${domain}_train.txt"
+	mv "${domain}_test.txt" "VanillaPACS/${domain}_test.txt"
+done
