@@ -94,7 +94,6 @@ class Trainer:
         # print(self.model)
         #self.source_loader, self.val_loader = mixup_data.get_mixup_domain_data(args,['art'])
         self.source_loader, self.val_loader = mixup_data.get_mixup_dataloader(args, patches=model.is_patch_based())
-        self.val_loader = self.source_loader
         self.target_loader = data_helper.get_jigsaw_val_dataloader(args, patches=model.is_patch_based())
         self.test_loaders = {"val": self.val_loader, "test": self.target_loader}
         self.len_dataloader = len(self.source_loader)
