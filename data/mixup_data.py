@@ -124,15 +124,15 @@ class JigsawMixUpDataset(data.Dataset):
             batch_y_data, batch_y_label = dom_y_iter.next()
             mixed_data, batch_x_label, batch_y_label, lam = mixup_data(batch_x_data, batch_x_label, batch_y_data[0], batch_y_label)
             if len(self.lam) > 0:
-              self.images = self.images+mixed_data
-              self.labels_x = self.labels_x + batch_x_label
-              self.labels_y = self.labels_y + batch_y_label
-              self.lam = self.lam + [lam]
+              self.images = torch.cat((self.images,mixed_data))
+              self.labels_x = torch.cat((self.labels_x , batch_x_label))
+              self.labels_y = torch.cat((self.labels_y , batch_y_label))
+              self.lam = torch.cat((self.lam , torch.Tensor([lam])))
             else:
               self.images = mixed_data
               self.labels_x = batch_x_label
               self.labels_y = batch_y_label
-              self.lam = [lam]
+              self.lam = torch.Tensor([lam])
       
 
     def makeMixUpData(self, source_list, args):
