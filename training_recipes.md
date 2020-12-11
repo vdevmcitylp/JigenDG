@@ -443,3 +443,17 @@ python cluster_eval.py --exp_type stylized-jigsaw --source art realworld product
 python cluster_eval.py --exp_type stylized-jigsaw --source realworld clipart product --target art --run_id 6125 --target_clustering
 
 python cluster_eval.py --exp_type stylized-jigsaw --source art clipart realworld --target product --run_id 6229 --target_clustering
+
+### Mixup Jigsaw Eval
+
+#### Art Target
+python train_jigsaw_mixup.py --dataset OfficeHome --jig_only --folder_name vanilla-jigsaw --source clipart realworld product --target art  --bias_whole_image 0.6 --epochs 100 --batch_size 128 --n_classes 65 --learning_rate 0.001 --network resnet18 --val_size 0.1 --jigsaw_n_classes 30 --train_all --image_size 222 --min_scale 0.8 --max_scale 1.0 --random_horiz_flip 0.5 --jitter 0.4 --tile_random_grayscale 0.1 --jig_weight 0.9 --seed 1 --mix_up
+
+#### Clipart Target
+python train_jigsaw_mixup.py --dataset OfficeHome --jig_only --folder_name vanilla-jigsaw --source  art realworld product --target clipart  --bias_whole_image 0.6 --epochs 100 --batch_size 128 --n_classes 65 --learning_rate 0.001 --network resnet18 --val_size 0.1 --jigsaw_n_classes 30 --train_all --image_size 222 --min_scale 0.8 --max_scale 1.0 --random_horiz_flip 0.5 --jitter 0.4 --tile_random_grayscale 0.1 --jig_weight 0.9 --seed 1 --mix_up
+
+#### Product Target
+python train_jigsaw_mixup.py --dataset OfficeHome --jig_only --folder_name vanilla-jigsaw --source  art realworld clipart --target  product --bias_whole_image 0.6 --epochs 100 --batch_size 128 --n_classes 65 --learning_rate 0.001 --network resnet18 --val_size 0.1 --jigsaw_n_classes 30 --train_all --image_size 222 --min_scale 0.8 --max_scale 1.0 --random_horiz_flip 0.5 --jitter 0.4 --tile_random_grayscale 0.1 --jig_weight 0.9 --seed 1 --mix_up
+
+#### Realworld Target
+python train_jigsaw_mixup.py --dataset OfficeHome --jig_only --folder_name vanilla-jigsaw --source  art product clipart --target realworld --bias_whole_image 0.6 --epochs 100 --batch_size 128 --n_classes 65 --learning_rate 0.001 --network resnet18 --val_size 0.1 --jigsaw_n_classes 30 --train_all --image_size 222 --min_scale 0.8 --max_scale 1.0 --random_horiz_flip 0.5 --jitter 0.4 --tile_random_grayscale 0.1 --jig_weight 0.9 --seed 1 --mix_up
