@@ -159,9 +159,11 @@ def get_args():
     parser.add_argument("--source", help = "Source", nargs = '+')
     parser.add_argument("--target", help = "Target")
     
-    parser.add_argument("--exp_type", choices = ["vanilla-jigsaw", "stylized-jigsaw"])
+    parser.add_argument("--exp_type")#, choices = ["vanilla-jigsaw", "stylized-jigsaw"])
     parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
         will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
+
+    parser.add_argument("--seed", type = int)
 
     args = parser.parse_args()
 
@@ -169,9 +171,8 @@ def get_args():
 
 if __name__ == "__main__":
     
-    set_seed(1)
-
     args = get_args()
+    set_seed(args.seed)
 
     # "vanilla-jigsaw/art-photo-sketch_to_cartoon/6068/" 
     exp_folder = "%s/%s_to_%s/%s/" % (args.exp_type, 

@@ -3,34 +3,35 @@ echo "Linear Evalulation: Vanilla Jigsaw"
 
 echo "Sketch"
 
-python LinearEval.py --exp_type vanilla-jigsaw --source art cartoon photo --target sketch --run_id 3811
+python LinearEval.py --seed 1 --run_id 3811 --exp_type OfficeHome/vanilla-jigsaw --source art cartoon photo --target sketch 
 
 echo "Cartoon"
 
-python LinearEval.py --exp_type vanilla-jigsaw --source art sketch photo --target cartoon --run_id 6556
+python LinearEval.py --seed 1 --run_id 6556 --exp_type OfficeHome/vanilla-jigsaw --source art sketch photo --target cartoon 
 
 echo "Art"
 
-python LinearEval.py --exp_type vanilla-jigsaw --source sketch cartoon photo --target art --run_id 8913
+python LinearEval.py --seed 1 --run_id 8913 --exp_type OfficeHome/vanilla-jigsaw --source sketch cartoon photo --target art 
 
 echo "Photo"
 
-python LinearEval.py --exp_type vanilla-jigsaw --source art cartoon sketch --target photo --run_id 1126
+python LinearEval.py --seed 1 --run_id 1126 --exp_type OfficeHome/vanilla-jigsaw --source art cartoon sketch --target photo 
+
 
 echo "Linear Evalulation: Stylized Jigsaw"
 
 echo "Sketch"
 
-python LinearEval.py --exp_type stylized-jigsaw --source art cartoon photo --target sketch --run_id 3361
+python LinearEval.py --seed 1 --run_id 3361 --exp_type OfficeHome/stylized-jigsaw --source art cartoon photo --target sketch 
 
 echo "Cartoon"
 
-python LinearEval.py --exp_type stylized-jigsaw --source art sketch photo --target cartoon --run_id 5584
+python LinearEval.py --seed 1 --run_id 5584 --exp_type OfficeHome/stylized-jigsaw --source art sketch photo --target cartoon 
 
 echo "Art"
 
-python LinearEval.py --exp_type stylized-jigsaw --source sketch cartoon photo --target art --run_id 8057
+python LinearEval.py --seed 1 --run_id 8057 --exp_type OfficeHome/stylized-jigsaw --source sketch cartoon photo --target art 
 
 echo "Photo"
 
-python LinearEval.py --exp_type stylized-jigsaw --source art cartoon sketch --target photo --run_id 425
+python LinearEval.py --seed 1 --run_id 425 --exp_type OfficeHome/stylized-jigsaw --source art cartoon sketch --target photo 
