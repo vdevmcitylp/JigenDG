@@ -45,6 +45,8 @@ def get_args():
 
     parser.add_argument("--generate_for", type = str, help = "Generate activations for this domain")
 
+    parser.add_argument("--dataset", choices = ["PACS", "OfficeHome"])
+
     return parser.parse_args()
 
 class Trainer:

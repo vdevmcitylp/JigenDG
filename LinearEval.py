@@ -129,14 +129,14 @@ def split_data(root, split, target):
     with open(osp.join(root, 'test_data.pkl'), 'wb') as handle:
           pickle.dump(te_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-def LinearEval(root, split=None):
+def LinearEval(root, n_classes, split=None):
     
     train_dataset = LinearEvalDataset('train_data.pkl', root, train_split=split)
     test_dataset = LinearEvalDataset('test_data.pkl', root)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
 
-    model = nn.Linear(512,7).cuda()
+    model = nn.Linear(512, n_classes).cuda()
     criterion = nn.CrossEntropyLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -162,6 +162,8 @@ def get_args():
     parser.add_argument("--exp_type")#, choices = ["vanilla-jigsaw", "stylized-jigsaw"])
     parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
         will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
+
+    parser.add_argument("--n_classes", type = int, choices = [7, 65])
 
     parser.add_argument("--seed", type = int)
 
@@ -190,7 +192,7 @@ if __name__ == "__main__":
     best_accs_dict = {}
 
     for split in splits:
-        best_split_acc = LinearEval(logs_folder, split = split)
+        best_split_acc = LinearEval(logs_folder, args.n_classes, split = split)
         best_accs_dict[split] = best_split_acc
 
     print(best_accs_dict)

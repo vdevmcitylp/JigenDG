@@ -1,37 +1,38 @@
 
-echo "Linear Evalulation: Vanilla Jigsaw"
-
-echo "Sketch"
-
-python LinearEval.py --seed 1 --run_id 3811 --exp_type OfficeHome/vanilla-jigsaw --source art cartoon photo --target sketch 
-
-echo "Cartoon"
-
-python LinearEval.py --seed 1 --run_id 6556 --exp_type OfficeHome/vanilla-jigsaw --source art sketch photo --target cartoon 
-
-echo "Art"
-
-python LinearEval.py --seed 1 --run_id 8913 --exp_type OfficeHome/vanilla-jigsaw --source sketch cartoon photo --target art 
-
-echo "Photo"
-
-python LinearEval.py --seed 1 --run_id 1126 --exp_type OfficeHome/vanilla-jigsaw --source art cartoon sketch --target photo 
-
-
 echo "Linear Evalulation: Stylized Jigsaw"
 
-echo "Sketch"
+echo "Product"
 
-python LinearEval.py --seed 1 --run_id 3361 --exp_type OfficeHome/stylized-jigsaw --source art cartoon photo --target sketch 
-
-echo "Cartoon"
-
-python LinearEval.py --seed 1 --run_id 5584 --exp_type OfficeHome/stylized-jigsaw --source art sketch photo --target cartoon 
+python LinearEval.py --seed 1 --run_id 2016 --exp_type OfficeHome/vanilla-jigsaw --n_classes 65 --source art clipart realworld --target product 
 
 echo "Art"
 
-python LinearEval.py --seed 1 --run_id 8057 --exp_type OfficeHome/stylized-jigsaw --source sketch cartoon photo --target art 
+python LinearEval.py --seed 1 --run_id 319 --exp_type OfficeHome/vanilla-jigsaw --n_classes 65 --source product clipart realworld --target art 
 
-echo "Photo"
+echo "Clipart"
 
-python LinearEval.py --seed 1 --run_id 425 --exp_type OfficeHome/stylized-jigsaw --source art cartoon sketch --target photo 
+python LinearEval.py --seed 1 --run_id 8174 --exp_type OfficeHome/vanilla-jigsaw --n_classes 65 --source product art realworld --target clipart 
+
+echo "Realworld"
+
+python LinearEval.py --seed 1 --run_id 5804 --exp_type OfficeHome/vanilla-jigsaw --n_classes 65 --source product art clipart --target realworld
+
+
+# echo "Linear Evalulation: Stylized Jigsaw"
+
+# echo "Product"
+
+# python LinearEval.py --seed 1 --run_id 6667 --exp_type OfficeHome/stylized-jigsaw --n_classes 65 --source art clipart realworld --target product 
+
+# echo "Art"
+
+# python LinearEval.py --seed 1 --run_id 1385 --exp_type OfficeHome/stylized-jigsaw --n_classes 65 --source product clipart realworld --target art 
+
+# echo "Clipart"
+
+# python LinearEval.py --seed 1 --run_id 6451 --exp_type OfficeHome/stylized-jigsaw --n_classes 65 --source product art realworld --target clipart 
+
+# echo "Realworld"
+
+# python LinearEval.py --seed 1 --run_id 1068 --exp_type OfficeHome/stylized-jigsaw --n_classes 65 --source product art clipart --target realworld
+
