@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Create separate txt_files for Stylized PACS experiments.
+# Creates separate txt_files for Stylized PACS experiments.
+# Copies Vanilla txt files to VanillaPACS folder.
 
 # data/
 # 	txt_files/

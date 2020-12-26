@@ -14,7 +14,6 @@ from data.data_helper import available_datasets
 from models import model_factory
 from optimizer.optimizer_helper import get_optim_and_scheduler
 from utils.Logger import Logger
-import numpy as np
 
 import numpy as np
 import time
