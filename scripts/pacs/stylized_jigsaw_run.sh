@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for lr in 0.1 0.01 0.0001
+for lr in 0.0002 0.0003 0.00003 
 do
 
 	echo $lr
