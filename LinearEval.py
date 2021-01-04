@@ -16,6 +16,8 @@ import timeit
 import pickle
 import os.path as osp
 
+from pprint import pprint
+
 def set_seed(seed):
 
     random.seed(seed)
@@ -167,6 +169,8 @@ def get_args():
 
     parser.add_argument("--seed", type = int)
 
+    parser.add_argument("--calc_for", help = "Calculate accuracy for which domain?")
+
     args = parser.parse_args()
 
     return args
@@ -185,7 +189,7 @@ if __name__ == "__main__":
     
     # Splitting target domain (logs_folder/act_label.pkl first to get 50-50 split)
     # Saves train_data.pkl and test_data.pkl in the same logs_folder
-    split_data(logs_folder, split = 0.5, target = args.target)
+    split_data(logs_folder, split = 0.5, target = args.calc_for)
     
     splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
 
@@ -193,9 +197,14 @@ if __name__ == "__main__":
 
     for split in splits:
         best_split_acc = LinearEval(logs_folder, args.n_classes, split = split)
-        best_accs_dict[split] = best_split_acc
+        best_accs_dict[split] = round(best_split_acc * 100, 2)
 
-    print(best_accs_dict)
+    pprint(best_accs_dict, width = 1)
+
+    with open(osp.join(logs_folder, "results.txt"), "a") as f:
+        f.write("\n{}\n".format(args.calc_for))
+        for sp, acc in best_accs_dict.items():
+            f.write("{}: {}\n".format(sp, acc))
 
     # python LinearEval.py --source art photo sketch --target cartoon --exp_type vanilla-jigsaw --run_id 6068
     # Assumes act_label.pkl is stored at logs_root/vanilla-jigsaw/art-photo-sketch_to_cartoon/6068

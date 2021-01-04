@@ -1,38 +1,54 @@
 
-echo "Linear Evalulation: Vanilla Jigsaw"
+#### Vanilla
+vp_id=8856
+va_id=1974
+vc_id=5249
+vs_id=8565
 
+
+#### Stylized
+sp_id=9476
+sa_id=2412
+sc_id=5310
+ss_id=8620
+
+vanilla_folder_name="PACS/scratch-vanilla-jigsaw"
+stylized_folder_name="PACS/scratch-stylized-jigsaw"
+
+echo "Linear Evalulation: Vanilla Jigsaw"
 
 echo "Photo"
 
-python LinearEval.py --seed 1 --run_id 3605 --exp_type PACS/vanilla-jigsaw --source art cartoon sketch --target photo
+python LinearEval.py --seed 1 --n_classes 7 --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --calc_for photo
 
 echo "Art"
 
-python LinearEval.py --seed 1 --run_id 120 --exp_type PACS/vanilla-jigsaw --source sketch cartoon photo --target art
+python LinearEval.py --seed 1 --n_classes 7 --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --calc_for art
 
 echo "Cartoon"
 
-python LinearEval.py --seed 1 --run_id 6849 --exp_type PACS/vanilla-jigsaw --source art sketch photo --target cartoon
+python LinearEval.py --seed 1 --n_classes 7 --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --calc_for cartoon
 
 echo "Sketch"
 
-python LinearEval.py --seed 1 --run_id 3776 --exp_type PACS/vanilla-jigsaw --source art cartoon photo --target sketch
+python LinearEval.py --seed 1 --n_classes 7 --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --calc_for sketch
 
 
 echo "Linear Evalulation: Stylized Jigsaw"
 
 echo "Photo"
 
-python LinearEval.py --seed 1 --run_id 4694 --exp_type PACS/stylized-jigsaw --source art cartoon sketch --target photo 
+python LinearEval.py --seed 1 --n_classes 7 --run_id $sp_id --exp_type $stylized_folder_name --source art cartoon sketch --target photo --calc_for photo
 
 echo "Art"
 
-python LinearEval.py --seed 1 --run_id 1112 --exp_type PACS/stylized-jigsaw --source sketch cartoon photo --target art 
+python LinearEval.py --seed 1 --n_classes 7 --run_id $sa_id --exp_type $stylized_folder_name --source sketch cartoon photo --target art --calc_for art
 
 echo "Cartoon"
 
-python LinearEval.py --seed 1 --run_id 7715 --exp_type PACS/stylized-jigsaw --source art sketch photo --target cartoon 
+python LinearEval.py --seed 1 --n_classes 7 --run_id $sc_id --exp_type $stylized_folder_name --source art sketch photo --target cartoon --calc_for cartoon
 
 echo "Sketch"
 
-python LinearEval.py --seed 1 --run_id 4677 --exp_type PACS/stylized-jigsaw --source art cartoon photo --target sketch 
+python LinearEval.py --seed 1 --n_classes 7 --run_id $ss_id --exp_type $stylized_folder_name --source art cartoon photo --target sketch --calc_for sketch
+

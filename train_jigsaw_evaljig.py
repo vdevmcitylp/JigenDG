@@ -77,7 +77,9 @@ def get_args():
     parser.add_argument("--jig_only", action="store_true", help="Disable classification loss")
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
     parser.add_argument("--seed", type=int, default=1, help="Random seed")
-    parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name sued for training")
+    parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name used for training")
+
+    parser.add_argument("--imagenet", action = "store_true", help = "Set for pre-trained weights.")
 
     return parser.parse_args()
 
@@ -86,8 +88,8 @@ class Trainer:
     def __init__(self, args, device):
         self.args = args
         self.device = device
-        model = model_factory.get_network(args.network)(jigsaw_classes=args.jigsaw_n_classes + 1,
-                                                        classes=args.n_classes)
+        model = model_factory.get_network(args.network)(pretrained = args.imagenet, 
+            jigsaw_classes=args.jigsaw_n_classes + 1, classes=args.n_classes)
         self.model = model.to(device)
         # print(self.model)
         self.source_loader, self.val_loader = data_helper.get_train_dataloader(args, patches=model.is_patch_based())

@@ -4,7 +4,7 @@ bias=0.6
 perm_set=30
 epochs=200
 
-for lr in 0.1
+for lr in 0.0001 0.00001
 do
 	echo $lr
 

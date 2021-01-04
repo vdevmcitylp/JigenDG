@@ -25,22 +25,27 @@ import functools
 def get_args():
     
     parser = argparse.ArgumentParser(description="Script to launch jigsaw training", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--source", choices=available_datasets, help="Source", nargs='+')
-    parser.add_argument("--target", choices=available_datasets, help="Target")
+    parser.add_argument("--source", help="Source", nargs='+')
+    parser.add_argument("--target", help="Target")
     parser.add_argument("--batch_size", "-b", type=int, default=64, help="Batch size")
     parser.add_argument("--image_size", type=int, default=225, help="Image size")
     
-    parser.add_argument("--limit_source", default=None, type=int, help="If set, it will limit the number of training samples")
-    parser.add_argument("--limit_target", default=None, type=int, help="If set, it will limit the number of testing samples")
+    parser.add_argument("--limit_source", default=None, type=int, 
+        help="If set, it will limit the number of training samples")
+    parser.add_argument("--limit_target", default=None, type=int, 
+        help="If set, it will limit the number of testing samples")
 
     parser.add_argument("--n_classes", "-c", type=int, default=31, help="Number of classes")
-    parser.add_argument("--jigsaw_n_classes", "-jc", type=int, default=31, help="Number of classes for the jigsaw task")
-    parser.add_argument("--network", choices=model_factory.nets_map.keys(), help="Which network to use", default="caffenet")
+    parser.add_argument("--jigsaw_n_classes", "-jc", type=int, default=31, 
+        help="Number of classes for the jigsaw task")
+    parser.add_argument("--network", choices=model_factory.nets_map.keys(), 
+        help="Which network to use", default="caffenet")
 
     parser.add_argument("--exp_type")#, choices = ["vanilla-jigsaw", "stylized-jigsaw"])
         
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
-    parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, model will be loaded from and \
+    parser.add_argument("--run_id", type = str, 
+        help = "Run ID of the experiment, model will be loaded from and \
         activations will be saved to args.exp_type/s1-s2-s3_to_s4/args.run_id")
 
     parser.add_argument("--generate_for", type = str, help = "Generate activations for this domain")
