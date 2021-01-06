@@ -1,16 +1,16 @@
 
 #### Vanilla
-vp_id=8856
-va_id=1974
-vc_id=5249
-vs_id=8565
+vp_id=7743
+va_id=644
+vc_id=3653
+vs_id=6874
 
 
 #### Stylized
-sp_id=9476
-sa_id=2412
-sc_id=5310
-ss_id=8620
+sp_id=6524
+sa_id=9451
+sc_id=2522
+ss_id=6072
 
 vanilla_folder_name="PACS/scratch-vanilla-jigsaw"
 stylized_folder_name="PACS/scratch-stylized-jigsaw"

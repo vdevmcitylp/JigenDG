@@ -69,7 +69,8 @@ def get_train_dataloader(args, patches):
             name_train, name_val, labels_train, labels_val = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'Vanilla'+ args.dataset ,'%s_train.txt' % dname), args.val_size)
         
         train_dataset = JigsawDataset(name_train, labels_train, patches=patches, img_transformer=img_transformer,
-                                      tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
+                                      tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image, 
+                                      grid_size = args.grid_size)
         
         
         if limit:
@@ -77,7 +78,8 @@ def get_train_dataloader(args, patches):
         datasets.append(train_dataset)
         if args.jig_only:
             val_datasets.append(JigsawDataset(name_val, labels_val, patches=patches, img_transformer=img_transformer, 
-                              tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image))
+                              tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image, 
+                              grid_size = args.grid_size))
         else:
             val_datasets.append(JigsawTestDataset(name_val, labels_val, img_transformer=get_val_transformer(args), 
                               patches=patches, jig_classes=args.jigsaw_n_classes))
@@ -120,7 +122,8 @@ def get_jigsaw_val_dataloader(args, patches=False):
     img_transformer = transforms.Compose(img_tr)
     tile_transformer = transforms.Compose(tile_tr)
     val_dataset = JigsawDataset(names, labels, patches=patches, img_transformer=img_transformer,
-                                      tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
+                                      tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image, 
+                                      grid_size = args.grid_size)
     if args.limit_target and len(val_dataset) > args.limit_target:
         val_dataset = Subset(val_dataset, args.limit_target)
         print("Using %d subset of val dataset" % args.limit_target)
@@ -158,6 +161,7 @@ def get_target_jigsaw_loader(args):
     else:
         name_train, _, labels_train, _ = get_split_dataset_info(join(dirname(__file__), 'txt_lists', 'Vanilla'+args.dataset, '%s_train.txt' % args.target), 0)
     dataset = JigsawDataset(name_train, labels_train, patches=False, img_transformer=img_transformer,
-                            tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image)
+                            tile_transformer=tile_transformer, jig_classes=args.jigsaw_n_classes, bias_whole_image=args.bias_whole_image, 
+                            grid_size = args.grid_size)
     loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
     return loader

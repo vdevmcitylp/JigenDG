@@ -1,22 +1,22 @@
 ### Get activations
 
 #### Vanilla
-vp_id=8856
-va_id=1974
-vc_id=5249
-vs_id=8565
+vp_id=4361
+va_id=1079
+vc_id=7830
+vs_id=4846
 
 
 #### Stylized
-sp_id=9476
-sa_id=2412
-sc_id=5310
-ss_id=8620
+sp_id=7853
+sa_id=4284
+sc_id=960
+ss_id=7915
 
 
-vanilla_folder_name="PACS/scratch-vanilla-jigsaw"
-stylized_folder_name="PACS/scratch-stylized-jigsaw"
-perm=30
+vanilla_folder_name="PACS/vanilla-jigsaw"
+stylized_folder_name="PACS/stylized-jigsaw"
+perm=1000
 
 #### Vanilla
 

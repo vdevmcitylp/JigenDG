@@ -191,7 +191,8 @@ if __name__ == "__main__":
     # Saves train_data.pkl and test_data.pkl in the same logs_folder
     split_data(logs_folder, split = 0.5, target = args.calc_for)
     
-    splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+    # splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+    splits = (0.7, 0.8, 0.9, 1.0)
 
     best_accs_dict = {}
 

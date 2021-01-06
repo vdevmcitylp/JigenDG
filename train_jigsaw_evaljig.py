@@ -21,6 +21,8 @@ import json
 import os.path as osp
 from PIL import Image
 
+import pdb
+
 def set_seed(seed):
 
     random.seed(seed)
@@ -80,6 +82,7 @@ def get_args():
     parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name used for training")
 
     parser.add_argument("--imagenet", action = "store_true", help = "Set for pre-trained weights.")
+    parser.add_argument("--grid_size", type = int, help = "Size of the grid.")
 
     return parser.parse_args()
 
@@ -122,6 +125,7 @@ class Trainer:
         self.model.train()
         epoch_loss = 0
         pbar = pkbar.Pbar(name = 'Epoch Progress', target = len(self.source_loader))
+
         for it, ((data, jig_l, class_l), d_idx) in enumerate(self.source_loader):
             pbar.update(it)
             data, jig_l, class_l, d_idx = data.to(self.device), jig_l.to(self.device), class_l.to(

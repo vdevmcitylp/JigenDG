@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from random import sample, random
 
+import pdb
 
 def get_random_subset(names, labels, percent):
     """
@@ -45,14 +46,14 @@ def get_split_dataset_info(txt_list, val_percentage):
 
 
 class JigsawDataset(data.Dataset):
-    def __init__(self, names, labels, jig_classes=100, img_transformer=None, tile_transformer=None, patches=True, bias_whole_image=None):
+    def __init__(self, names, labels, jig_classes=100, img_transformer=None, tile_transformer=None, patches=True, bias_whole_image=None, grid_size = 3):
         self.data_path = ""
         self.names = names
         self.labels = labels
 
         self.N = len(self.names)
         self.permutations = self.__retrieve_permutations(jig_classes)
-        self.grid_size = 3
+        self.grid_size = grid_size
         self.bias_whole_image = bias_whole_image
         if patches:
             self.patch_size = 64
@@ -80,11 +81,17 @@ class JigsawDataset(data.Dataset):
         return self._image_transformer(img)
         
     def __getitem__(self, index):
+
         img = self.get_image(index)
-        n_grids = self.grid_size ** 2
+        # print(img.size)
+        n_grids = self.grid_size ** 2 # 16
+        # print(n_grids)
         tiles = [None] * n_grids
         for n in range(n_grids):
             tiles[n] = self.get_tile(img, n)
+        tiles_shape = [g.shape for g in tiles]
+        print(tiles_shape)
+        # print(tiles)
 
         order = np.random.randint(len(self.permutations) + 1)  # added 1 for class 0: unsorted
         if self.bias_whole_image:
@@ -93,8 +100,13 @@ class JigsawDataset(data.Dataset):
         if order == 0:
             data = tiles
         else:
-            data = [tiles[self.permutations[order - 1][t]] for t in range(n_grids)]
-            
+            # data = [tiles[self.permutations[order - 1][t]] for t in range(n_grids)]
+            data = []
+            for t in range(n_grids):
+                print(t)
+                print(tiles[self.permutations[order - 1][t]].shape)
+                data += [tiles[self.permutations[order - 1][t]]]
+
         data = torch.stack(data, 0)
         return self.returnFunc(data), int(order), int(self.labels[index])
 
