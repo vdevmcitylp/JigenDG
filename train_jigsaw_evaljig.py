@@ -21,6 +21,8 @@ import json
 import os.path as osp
 from PIL import Image
 
+import pdb
+
 def set_seed(seed):
 
     random.seed(seed)
@@ -80,6 +82,7 @@ def get_args():
     parser.add_argument("--dataset", choices = ['PACS', 'OfficeHome'], help="Dataset Name used for training")
 
     parser.add_argument("--imagenet", action = "store_true", help = "Set for pre-trained weights.")
+    parser.add_argument("--grid_size", type = int, help = "Size of the grid.")
 
     return parser.parse_args()
 
@@ -88,7 +91,7 @@ class Trainer:
     def __init__(self, args, device):
         self.args = args
         self.device = device
-        model = model_factory.get_network(args.network)(pretrained = args.imagenet, 
+        model = model_factory.get_network(args.network)(pretrained = args.imagenet,
             jigsaw_classes=args.jigsaw_n_classes + 1, classes=args.n_classes)
         self.model = model.to(device)
         # print(self.model)
@@ -114,7 +117,7 @@ class Trainer:
         self.best_jigsaw_acc = 0.0
         _, logname = Logger.get_name_from_args(args)
 
-        self.folder_name = "%s/%s_to_%s/%s" % (args.folder_name, 
+        self.folder_name = "%s/%s_to_%s/%s" % (args.folder_name,
             "-".join(sorted(args.source)), args.target, logname)
 
     def _do_epoch(self):
@@ -122,6 +125,7 @@ class Trainer:
         self.model.train()
         epoch_loss = 0
         pbar = pkbar.Pbar(name = 'Epoch Progress', target = len(self.source_loader))
+
         for it, ((data, jig_l, class_l), d_idx) in enumerate(self.source_loader):
             pbar.update(it)
             data, jig_l, class_l, d_idx = data.to(self.device), jig_l.to(self.device), class_l.to(
@@ -265,7 +269,7 @@ class Trainer:
 
         # Save results
         with open(osp.join('logs', self.folder_name, 'results.txt'), 'w') as f:
-            f.write("Best val %g, corresponding test %g - best test: %g" % (val_res.max(), 
+            f.write("Best val %g, corresponding test %g - best test: %g" % (val_res.max(),
                 test_res[idx_best], test_res.max()))
 
         return self.logger, self.model
@@ -280,9 +284,10 @@ def main():
     else:
         print("Using txt_files/Vanilla"+args.dataset)
     trainer = Trainer(args, device)
-    
+
     trainer.do_training()
 
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
     main()
+                                                                                                                                     
