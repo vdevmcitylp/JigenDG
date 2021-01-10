@@ -45,14 +45,16 @@ def get_split_dataset_info(txt_list, val_percentage):
 
 
 class JigsawDataset(data.Dataset):
-    def __init__(self, names, labels, jig_classes=100, img_transformer=None, tile_transformer=None, patches=True, bias_whole_image=None):
+    def __init__(self, names, labels, grid_size=3, jig_classes=100, img_transformer=None, tile_transformer=None, patches=True, bias_whole_image=None):
         self.data_path = ""
         self.names = names
         self.labels = labels
 
         self.N = len(self.names)
-        self.permutations = self.__retrieve_permutations(jig_classes)
-        self.grid_size = 3
+        self.grid_size = grid_size
+        n_grids = self.grid_size**2
+        self.permutations = self.__retrieve_permutations(n_grids, jig_classes)
+
         self.bias_whole_image = bias_whole_image
         if patches:
             self.patch_size = 64
@@ -66,7 +68,7 @@ class JigsawDataset(data.Dataset):
             self.returnFunc = make_grid
 
     def get_tile(self, img, n):
-        w = float(img.size[0]) / self.grid_size
+        w = int(float(img.size[0]) / self.grid_size)
         y = int(n / self.grid_size)
         x = n % self.grid_size
         tile = img.crop([x * w, y * w, (x + 1) * w, (y + 1) * w])
@@ -81,6 +83,7 @@ class JigsawDataset(data.Dataset):
         
     def __getitem__(self, index):
         img = self.get_image(index)
+
         n_grids = self.grid_size ** 2
         tiles = [None] * n_grids
         for n in range(n_grids):
@@ -101,8 +104,9 @@ class JigsawDataset(data.Dataset):
     def __len__(self):
         return len(self.names)
 
-    def __retrieve_permutations(self, classes):
-        all_perm = np.load('permutations_%d.npy' % (classes))
+    def __retrieve_permutations(self,n_grids, classes):
+        all_perm = np.load('permutations_%d_%d.npy' % (n_grids, classes))
+
         # from range [1,9] to [0,8]
         if all_perm.min() == 1:
             all_perm = all_perm - 1
@@ -142,7 +146,7 @@ class JigsawTestDatasetMultiple(JigsawDataset):
         _img = Image.open(framename).convert('RGB')
         img = self._image_transformer(_img)
 
-        w = float(img.size[0]) / self.grid_size
+        w = int(float(img.size[0]) / self.grid_size)
         n_grids = self.grid_size ** 2
         images = []
         jig_labels = []
@@ -150,6 +154,8 @@ class JigsawTestDatasetMultiple(JigsawDataset):
         for n in range(n_grids):
             y = int(n / self.grid_size)
             x = n % self.grid_size
+            print('\n \n')
+            print(x,y,w,n)
             tile = img.crop([x * w, y * w, (x + 1) * w, (y + 1) * w])
             tile = self._augment_tile(tile)
             tiles[n] = tile
