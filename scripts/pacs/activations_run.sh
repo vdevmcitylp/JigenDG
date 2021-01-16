@@ -1,77 +1,76 @@
 ### Get activations
 
 #### Vanilla
-vp_id=4361
-va_id=1079
-vc_id=7830
-vs_id=4846
-
+# vp_id=4361
+# va_id=1079
+# vc_id=7830
+# vs_id=4846
 
 #### Stylized
-sp_id=7853
-sa_id=4284
-sc_id=960
-ss_id=7915
+sp_id=6982
+sa_id=5892
+sc_id=3315
+ss_id=3363
 
 
 vanilla_folder_name="PACS/vanilla-jigsaw"
-stylized_folder_name="PACS/stylized-jigsaw"
-perm=1000
+stylized_folder_name="PACS/scratch-stylized-jigsaw"
+perm=30
 
 #### Vanilla
 
-echo "Activations: Vanilla Jigsaw"
+# echo "Activations: Vanilla Jigsaw"
 
-# Sketch Target: 3811
+# # Sketch Target: 3811
 
-echo "Sketch"
+# echo "Sketch"
 
-python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
-
-
-# Cartoon Target: 6556
-
-echo "Cartoon"
-
-python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
-
-python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
-
-python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
-
-python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vs_id --exp_type $vanilla_folder_name --source art cartoon photo --target sketch --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
 
-# Art Target: 8913
+# # Cartoon Target: 6556
 
-echo "Art"
+# echo "Cartoon"
 
-python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $vc_id --exp_type $vanilla_folder_name --source art sketch photo --target cartoon --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
 
-# Photo Target: 1126
+# # Art Target: 8913
 
-echo "Photo"
+# echo "Art"
 
-python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
-python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+# python get_activations.py --run_id $va_id --exp_type $vanilla_folder_name --source sketch cartoon photo --target art --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+
+
+# # Photo Target: 1126
+
+# echo "Photo"
+
+# python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for sketch --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+
+# python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for cartoon --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+
+# python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for art --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
+
+# python get_activations.py --run_id $vp_id --exp_type $vanilla_folder_name --source art cartoon sketch --target photo --dataset PACS --generate_for photo --batch_size 128 --n_classes 7 --network resnet18 --jigsaw_n_classes $perm --image_size 222
 
 
 ### Stylized

@@ -90,7 +90,7 @@ class JigsawDataset(data.Dataset):
         for n in range(n_grids):
             tiles[n] = self.get_tile(img, n)
         tiles_shape = [g.shape for g in tiles]
-        print(tiles_shape)
+        # print(tiles_shape)
         # print(tiles)
 
         order = np.random.randint(len(self.permutations) + 1)  # added 1 for class 0: unsorted
@@ -100,12 +100,12 @@ class JigsawDataset(data.Dataset):
         if order == 0:
             data = tiles
         else:
-            # data = [tiles[self.permutations[order - 1][t]] for t in range(n_grids)]
-            data = []
-            for t in range(n_grids):
-                print(t)
-                print(tiles[self.permutations[order - 1][t]].shape)
-                data += [tiles[self.permutations[order - 1][t]]]
+            data = [tiles[self.permutations[order - 1][t]] for t in range(n_grids)]
+            # data = []
+            # for t in range(n_grids):
+            #     print(t)
+            #     print(tiles[self.permutations[order - 1][t]].shape)
+            #     data += [tiles[self.permutations[order - 1][t]]]
 
         data = torch.stack(data, 0)
         return self.returnFunc(data), int(order), int(self.labels[index])

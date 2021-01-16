@@ -16,6 +16,8 @@ import timeit
 import pickle
 import os.path as osp
 
+import pandas as pd
+
 from pprint import pprint
 
 def set_seed(seed):
@@ -80,7 +82,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch):
 
         loss.backward()
         optimizer.step()
-        # if batch_idx % 100 == 0:
+        # if batch_idx % 300 == 0:
         #     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
         #         epoch, batch_idx * len(data), len(train_loader.dataset),
         #         100. * batch_idx / len(train_loader), loss.item()))
@@ -165,7 +167,7 @@ def get_args():
     parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
         will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
 
-    parser.add_argument("--n_classes", type = int, choices = [7, 65])
+    parser.add_argument("--n_classes", type = int, choices = [7, 65, 345])
 
     parser.add_argument("--seed", type = int)
 
@@ -191,8 +193,9 @@ if __name__ == "__main__":
     # Saves train_data.pkl and test_data.pkl in the same logs_folder
     split_data(logs_folder, split = 0.5, target = args.calc_for)
     
-    # splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
-    splits = (0.7, 0.8, 0.9, 1.0)
+    # splits = (0.1, )
+    splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+    # splits = (0.7, 0.8, 0.9, 1.0)
 
     best_accs_dict = {}
 
@@ -200,7 +203,10 @@ if __name__ == "__main__":
         best_split_acc = LinearEval(logs_folder, args.n_classes, split = split)
         best_accs_dict[split] = round(best_split_acc * 100, 2)
 
-    pprint(best_accs_dict, width = 1)
+    df = pd.DataFrame.from_dict(best_accs_dict, orient = "index")
+    print(df.to_csv(sep = '\t', index = False))
+
+    # pprint(best_accs_dict, width = 1)
 
     with open(osp.join(logs_folder, "results.txt"), "a") as f:
         f.write("\n{}\n".format(args.calc_for))

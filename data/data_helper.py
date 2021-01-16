@@ -14,12 +14,15 @@ svhn = 'svhn'
 synth = 'synth'
 usps = 'usps'
 
-vlcs_datasets = ["CALTECH", "LABELME", "PASCAL", "SUN"]
 pacs_datasets = ["art", "cartoon", "photo", "sketch"]
-office_datasets = ["amazon", "dslr", "webcam"]
 officehome_datasets = ["art", "clipart", "product", "realworld"]
+domainnet_datasets = ["clipart", "painting", "quickdraw", "real", "sketch"]
+
+vlcs_datasets = ["CALTECH", "LABELME", "PASCAL", "SUN"]
+office_datasets = ["amazon", "dslr", "webcam"]
 digits_datasets = [mnist, mnist, svhn, usps]
-available_datasets = office_datasets + pacs_datasets + vlcs_datasets + digits_datasets + officehome_datasets
+available_datasets = office_datasets + pacs_datasets + vlcs_datasets + digits_datasets + \
+                        officehome_datasets + domainnet_datasets
 #office_paths = {dataset: "/home/enoon/data/images/office/%s" % dataset for dataset in office_datasets}
 #pacs_paths = {dataset: "/home/enoon/data/images/PACS/kfold/%s" % dataset for dataset in pacs_datasets}
 #vlcs_paths = {dataset: "/home/enoon/data/images/VLCS/%s/test" % dataset for dataset in pacs_datasets}

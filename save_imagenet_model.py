@@ -49,7 +49,7 @@ def main():
 	model = model_factory.get_network(args.network)(jigsaw_classes = args.jigsaw_n_classes + 1, 
 		classes = args.n_classes)
 
-	save_path = os.path.join("logs", args.folder_name, "m-m-m_to_m", "0")
+	save_path = os.path.join("logs", args.folder_name, "m-m-m-m_to_m", "0")
 	
 	if not os.path.exists(save_path):
 		os.makedirs(save_path)

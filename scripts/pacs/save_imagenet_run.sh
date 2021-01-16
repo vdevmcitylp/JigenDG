@@ -1,8 +1,8 @@
 
 folder_name="PACS/vanilla-jigsaw"
 
-# python save_imagenet_model.py --folder_name $folder_name \
-# --network resnet18 --n_classes 7 --jigsaw_n_classes 30 
+python save_imagenet_model.py --folder_name $folder_name \
+--network resnet18 --n_classes 7 --jigsaw_n_classes 30 
 
 perm=30
 
