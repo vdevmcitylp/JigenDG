@@ -96,7 +96,7 @@ class Trainer:
         if self.freeze_layer == 1:
             self.model.avgpool.register_forward_hook(self.hook)
         elif self.freeze_layer == 2:
-            self.model.layer4[1].relu.register_forward_hook(self.hook) 
+            self.model.layer4[1].bn1.register_forward_hook(self.hook) 
         elif self.freeze_layer == 3:
             self.model.layer4[0].register_forward_hook(self.hook) 
         self.model.eval()
