@@ -1,6 +1,6 @@
 import argparse
 import random
-
+import pandas as pd
 import os
 import torch
 import torch.nn as nn
@@ -15,8 +15,7 @@ import torch.optim as optim
 import timeit
 import pickle
 import os.path as osp
-
-from pprint import pprint
+import pkbar
 
 def set_seed(seed):
 
@@ -30,6 +29,49 @@ def set_seed(seed):
         torch.backends.cudnn.benchmark = False
     os.environ["PYTHONHASHSEED"] = str(seed)
 
+class Model3(nn.Module):
+    def __init__(self, n_classes):
+        super(Model3, self).__init__()
+        # 1 input image channel, 6 output channels, 3x3 square convolution
+        # kernel
+        self.conv1 = nn.Conv2d(512,512,3,1,1,bias=False)
+        self.conv2 = nn.Conv2d(512,512,3,1,1, bias=False)
+        self.bn1 = nn.BatchNorm2d(512)
+        self.bn2 = nn.BatchNorm2d(512)
+        self.relu = nn.ReLU(inplace=True)
+        self.avg_pool = nn.AvgPool2d(7, stride=1)
+        self.fc = nn.Linear(512, n_classes)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.avg_pool(x)
+        x = x.view(x.size(0),-1)
+        x = self.fc(x)
+        return x
+class Model2(nn.Module):
+
+    def __init__(self, n_classes):
+        super(Model2, self).__init__()
+        # 1 input image channel, 6 output channels, 3x3 square convolution
+        # kernel
+        self.relu = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(512,512,3,1,1,bias=False)
+        self.bn = nn.BatchNorm2d(512)
+        self.avg_pool = nn.AvgPool2d(7, stride=1)
+        self.fc = nn.Linear(512, n_classes)
+
+    def forward(self, x):
+        # Max pooling over a (2, 2) windo
+        x = self.relu(x)
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.avg_pool(x)
+        x = x.view(x.size(0),-1)
+        x = self.fc(x) 
+        return x
 
 class LinearEvalDataset(Dataset):
     
@@ -72,8 +114,10 @@ class LinearEvalDataset(Dataset):
 
 def train(model, device, train_loader, criterion, optimizer, epoch):
     model.train()
+    #pbar =pkbar.Pbar(name = "Epoch Progress", target = len(train_loader))
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
+     #   pbar.update(batch_idx)
         optimizer.zero_grad()
         output = model(data)
         loss = criterion(output, target)
@@ -111,8 +155,8 @@ def shuffle(x, y):
     y = y[perm]
     return x,y
 
-def split_data(root, split, target):
-    pkl_file = osp.join(root, 'act_labels_{}.pkl'.format(target))
+def split_data(root, split, target, layer):
+    pkl_file = osp.join(root, 'act_labels_{}_layer_{}.pkl'.format(target, layer))
     with open(pkl_file, 'rb') as handle:
           data = pickle.load(handle)
     n = int(split*len(data['labels']))
@@ -131,20 +175,31 @@ def split_data(root, split, target):
     with open(osp.join(root, 'test_data.pkl'), 'wb') as handle:
           pickle.dump(te_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-def LinearEval(root, n_classes, split=None):
+
+def get_model(layer, n_classes):
+    if layer == 1:
+        model = nn.Linear(512, n_classes).cuda()
+    elif layer == 2:
+        model = Model2(n_classes)
+    elif layer == 3:
+        model = Model3(n_classes)
+    return model
+
+def LinearEval(root, n_classes, layer, split=None):
     
     train_dataset = LinearEvalDataset('train_data.pkl', root, train_split=split)
     test_dataset = LinearEvalDataset('test_data.pkl', root)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory=True)
 
-    model = nn.Linear(512, n_classes).cuda()
+    model = get_model(layer, n_classes).cuda()
     criterion = nn.CrossEntropyLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     best_acc = 0
     start = timeit.default_timer()
     for epoch in range(1, 100):
+      #  print("Training epoch {}/100".format(epoch))
         train(model, device, train_loader, criterion, optimizer, epoch)
         loss, acc = test(model, device, test_loader, criterion)
         if acc > best_acc:
@@ -160,7 +215,8 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", help = "Source", nargs = '+')
     parser.add_argument("--target", help = "Target")
-    
+    parser.add_argument("--freeze_layer", default=1, type=int, help="Number of layers to train")
+
     parser.add_argument("--exp_type")#, choices = ["vanilla-jigsaw", "stylized-jigsaw"])
     parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
         will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
@@ -168,8 +224,6 @@ def get_args():
     parser.add_argument("--n_classes", type = int, choices = [7, 65])
 
     parser.add_argument("--seed", type = int)
-
-    parser.add_argument("--calc_for", help = "Calculate accuracy for which domain?")
 
     args = parser.parse_args()
 
@@ -184,27 +238,29 @@ if __name__ == "__main__":
     exp_folder = "%s/%s_to_%s/%s/" % (args.exp_type, 
             "-".join(sorted(args.source)), args.target, args.run_id) 
 
-    logs_root = "/DATA1/vaasudev_narayanan/repositories/JigenDG/logs"
+    logs_root = "/DATA1/neha_t/JiGen/logs"
     logs_folder = osp.join(logs_root, exp_folder)
     
     # Splitting target domain (logs_folder/act_label.pkl first to get 50-50 split)
     # Saves train_data.pkl and test_data.pkl in the same logs_folder
-    split_data(logs_folder, split = 0.5, target = args.calc_for)
+    split_data(logs_folder, split = 0.5, target = args.target, layer=args.freeze_layer)
     
-    splits = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+    splits = {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
 
     best_accs_dict = {}
 
+    #for split in splits:
+    #    best_split_acc = LinearEval(logs_folder, args.n_classes, split = split)
+    #    best_accs_dict[split] = best_split_acc
+    best_accs_dict = {}
     for split in splits:
-        best_split_acc = LinearEval(logs_folder, args.n_classes, split = split)
-        best_accs_dict[split] = round(best_split_acc * 100, 2)
+       print("Running for split: ",split)
+       best_split_acc = LinearEval(logs_folder, args.n_classes, args.freeze_layer, split = split)
+       best_accs_dict[split] = round(best_split_acc * 100, 2)
 
-    pprint(best_accs_dict, width = 1)
-
-    with open(osp.join(logs_folder, "results.txt"), "a") as f:
-        f.write("\n{}\n".format(args.calc_for))
-        for sp, acc in best_accs_dict.items():
-            f.write("{}: {}\n".format(sp, acc))
+    df = pd.DataFrame.from_dict(best_accs_dict, orient = "index")
+    print(df.to_csv(sep = '\t', index = False))
+    #print(best_accs_dict)
 
     # python LinearEval.py --source art photo sketch --target cartoon --exp_type vanilla-jigsaw --run_id 6068
     # Assumes act_label.pkl is stored at logs_root/vanilla-jigsaw/art-photo-sketch_to_cartoon/6068
