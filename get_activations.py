@@ -38,7 +38,7 @@ def get_args():
     parser.add_argument("--jigsaw_n_classes", "-jc", type=int, default=31, help="Number of classes for the jigsaw task")
     parser.add_argument("--network", choices=model_factory.nets_map.keys(), help="Which network to use", default="caffenet")
 
-    parser.add_argument("--exp_type")#, choices = ["vanilla-jigsaw", "stylized-jigsaw"])
+    parser.add_argument("--exp_type", type = str)
         
     parser.add_argument("--stylized", action = "store_true", help = "Use txt_files/StylizedPACS/")
     parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, model will be loaded from and \
@@ -46,7 +46,7 @@ def get_args():
 
     parser.add_argument("--generate_for", type = str, help = "Generate activations for this domain")
 
-    parser.add_argument("--dataset", choices = ["PACS", "OfficeHome","Office"])
+    parser.add_argument("--dataset", choices = ["PACS", "OfficeHome", "Office"])
 
     return parser.parse_args()
 
