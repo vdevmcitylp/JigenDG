@@ -50,7 +50,7 @@ def get_args():
 
     parser.add_argument("--generate_for", type = str, help = "Generate activations for this domain")
 
-    parser.add_argument("--dataset", choices = ["PACS", "OfficeHome"])
+    parser.add_argument("--dataset", choices = ["PACS", "OfficeHome", "DomainNet"])
 
     return parser.parse_args()
 

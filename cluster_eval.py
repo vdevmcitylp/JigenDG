@@ -9,7 +9,10 @@ from sklearn.cluster import KMeans
 import os.path as osp
 import warnings
 warnings.filterwarnings('ignore')
+
 import pickle
+import random
+import os
 
 # def load_data(pkl_file):
 # 	with open(pkl_file, 'rb') as handle:
@@ -168,9 +171,9 @@ def calculate_ari(predict_labels, true_labels):
 	return ari
 
 
-def cluster(data):
+def cluster(data, num_classes):
 
-	kmeans = KMeans(n_clusters = 7, max_iter = 300).fit(data)
+	kmeans = KMeans(n_clusters = num_classes, max_iter = 300).fit(data)
 	return kmeans
 
 def evaluate_clustering(model, data, labels):
@@ -179,7 +182,8 @@ def evaluate_clustering(model, data, labels):
 	acc_v, acc_i = calculate_acc(clusters, labels)
 	nmi_v = calculate_nmi(clusters, labels)
 	ari_v = calculate_ari(clusters, labels)
-	print("Accuracy %f NMI %f ARI %f" % (acc_v * 100, nmi_v, ari_v))
+	# print("Accuracy %f NMI %f ARI %f" % (acc_v * 100, nmi_v, ari_v))
+	print(acc_v * 100, nmi_v, ari_v)
 	return acc_v, nmi_v, ari_v
 
 
@@ -231,10 +235,12 @@ def get_args():
 
 	parser.add_argument("--split", type = float, help = "Proportion of target data used for clustering")
 
-	parser.add_argument("--exp_type", choices = ["vanilla-jigsaw", "stylized-jigsaw"])
+	parser.add_argument("--exp_type")
 
 	parser.add_argument("--run_id", type = str, help = "Run ID of the experiment, act_label.pkl \
         will be loaded from args.exp_type/s1-s2-s3_to_s4/args.run_id")
+
+	parser.add_argument("--num_classes", type = int)
 
 	parser.add_argument("--seed", type = int, choices = [1, 2, 3])
 
@@ -253,23 +259,23 @@ def main(args, logs_root):
 	
 	if args.source_clustering:
 		
-		print("Clustering on source domains ...")
+		# print("Clustering on source domains ...")
 		assert args.target_clustering == False
 
 		source_features, source_labels = load_source_data(logs_folder, args.source)
 
-		model = cluster(source_features)
+		model = cluster(source_features, args.num_classes)
 
 	if args.target_clustering:
 		
-		print("Clustering on target domain images ...")
+		# print("Clustering on target domain images ...")
 		assert args.source_clustering == False
 
 		# print("Using {}% of target domain images for clustering".format(args.split * 100))
 
-		model = cluster(target_features)
+		model = cluster(target_features, args.num_classes)
 	
-	print("Results for {}".format(args.target))
+	# print("Results for {}".format(args.target))
 	evaluate_clustering(model, target_features, target_labels)
 
 
